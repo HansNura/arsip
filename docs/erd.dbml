@@ -1,0 +1,385 @@
+// ERD Sistem e-ARSIP — SQLite 3.35+
+// Impor file ini ke https://dbdiagram.io
+// CHECK constraints dan partial index dicatat pada Note tiap tabel.
+
+Project e_arsip {
+  database_type: 'SQLite'
+  Note: 'ERD e-ARSIP v1.0 — tipe mengikuti storage class SQLite (INTEGER/TEXT/REAL/BLOB). Tanggal disimpan sebagai TEXT ISO-8601 UTC.'
+}
+
+Table users {
+  id integer [pk, increment]
+  nama text [not null]
+  email text [not null]
+  password_hash text [not null]
+  role text [not null, default: 'staf_arsip', note: 'admin | staf_arsip']
+  is_active integer [not null, default: 1, note: '0 | 1']
+  last_login_at text
+  created_at text [not null, default: `strftime('%Y-%m-%dT%H:%M:%SZ','now')`]
+  updated_at text [not null]
+  deleted_at text
+
+  indexes {
+    (`lower(email)`) [unique, name: 'ux_users_email']
+  }
+
+  Note: 'CHECK (role IN (admin, staf_arsip)); CHECK (is_active IN (0,1)). Index email parsial WHERE deleted_at IS NULL.'
+}
+
+Table user_sessions {
+  id integer [pk, increment]
+  user_id integer [not null, ref: > users.id]
+  token_hash text [not null, unique]
+  expires_at text [not null]
+  revoked_at text
+  ip_address text
+  user_agent text
+  created_at text [not null, default: `strftime('%Y-%m-%dT%H:%M:%SZ','now')`]
+
+  indexes {
+    (user_id, expires_at) [name: 'ix_user_sessions_user_expiry']
+  }
+
+  Note: 'FK ON DELETE CASCADE. Simpan hash token, bukan token mentah.'
+}
+
+Table programs {
+  id integer [pk, increment]
+  kode_program text [not null, unique]
+  nama text [not null]
+  deskripsi text
+  standar_kompetensi text
+  durasi_jam integer [note: 'CHECK >= 0']
+  nilai_min_lulus real [not null, default: 70, note: 'CHECK 0..100']
+  is_active integer [not null, default: 1, note: '0 | 1']
+  created_at text [not null, default: `strftime('%Y-%m-%dT%H:%M:%SZ','now')`]
+  updated_at text [not null]
+  deleted_at text
+
+  Note: 'CHECK (is_active IN (0,1)); CHECK (nilai_min_lulus BETWEEN 0 AND 100).'
+}
+
+Table batches {
+  id integer [pk, increment]
+  program_id integer [not null, ref: > programs.id]
+  kode_batch text [not null, unique]
+  nama text [not null]
+  tahun integer [not null, note: 'CHECK 1900..2200']
+  tanggal_mulai text
+  tanggal_selesai text
+  kuota integer [note: 'CHECK >= 0']
+  lokasi text
+  status text [not null, default: 'direncanakan', note: 'direncanakan | berjalan | selesai | dibatalkan']
+  created_at text [not null, default: `strftime('%Y-%m-%dT%H:%M:%SZ','now')`]
+  updated_at text [not null]
+  deleted_at text
+
+  indexes {
+    (program_id, tahun) [name: 'ix_batches_program_tahun']
+    (tahun, status) [name: 'ix_batches_tahun_status']
+  }
+
+  Note: 'FK program_id ON DELETE RESTRICT. CHECK tanggal_selesai >= tanggal_mulai.'
+}
+
+Table participants {
+  id integer [pk, increment]
+  nik text [not null, unique, note: '16 digit angka']
+  nama_lengkap text [not null]
+  jenis_kelamin text [note: 'L | P']
+  tempat_lahir text
+  tanggal_lahir text
+  alamat text
+  email text
+  no_telepon text
+  pendidikan_terakhir text
+  pekerjaan text
+  instansi text
+  foto_path text
+  catatan text
+  archived_at text
+  storage_tier text [not null, default: 'hot', note: 'hot | cold']
+  created_at text [not null, default: `strftime('%Y-%m-%dT%H:%M:%SZ','now')`]
+  updated_at text [not null]
+  deleted_at text
+
+  indexes {
+    (nama_lengkap) [name: 'ix_participants_nama', note: 'COLLATE NOCASE']
+    (`lower(email)`) [unique, name: 'ux_participants_email']
+    (deleted_at) [name: 'ix_participants_deleted']
+  }
+
+  Note: 'CHECK NIK 16 digit; CHECK jenis_kelamin IN (L,P); CHECK storage_tier IN (hot,cold). Index nama COLLATE NOCASE dan email parsial WHERE email IS NOT NULL AND deleted_at IS NULL.'
+}
+
+Table enrollments {
+  id integer [pk, increment]
+  participant_id integer [not null, ref: > participants.id]
+  batch_id integer [not null, ref: > batches.id]
+  nomor_peserta text
+  status_pendaftaran text [not null, default: 'terdaftar', note: 'terdaftar | aktif | mengundurkan_diri | selesai | dibatalkan']
+  status_kelulusan text [not null, default: 'belum_dinilai', note: 'belum_dinilai | lulus | tidak_lulus']
+  tanggal_daftar text [not null]
+  nilai_akhir real [note: 'CHECK 0..100']
+  created_at text [not null, default: `strftime('%Y-%m-%dT%H:%M:%SZ','now')`]
+  updated_at text [not null]
+  deleted_at text
+
+  indexes {
+    (participant_id, batch_id) [unique, name: 'ux_enrollments_participant_batch']
+    (batch_id, nomor_peserta) [unique, name: 'ux_enrollments_batch_nomor']
+    (batch_id, status_kelulusan) [name: 'ix_enrollments_batch_status']
+  }
+
+  Note: 'FK RESTRICT. Unique parsial: participant+batch WHERE deleted_at IS NULL; batch+nomor WHERE nomor_peserta IS NOT NULL AND deleted_at IS NULL.'
+}
+
+Table training_sessions {
+  id integer [pk, increment]
+  batch_id integer [not null, ref: > batches.id]
+  pertemuan_ke integer [not null, note: 'CHECK > 0']
+  tanggal text [not null]
+  topik text
+  pengajar text
+  catatan text
+  created_at text [not null, default: `strftime('%Y-%m-%dT%H:%M:%SZ','now')`]
+  updated_at text [not null]
+
+  indexes {
+    (batch_id, pertemuan_ke) [unique, name: 'ux_training_sessions_batch_pertemuan']
+  }
+
+  Note: 'FK batch_id ON DELETE CASCADE.'
+}
+
+Table attendance {
+  id integer [pk, increment]
+  enrollment_id integer [not null, ref: > enrollments.id]
+  training_session_id integer [not null, ref: > training_sessions.id]
+  status text [not null, note: 'hadir | izin | sakit | alpa']
+  catatan text
+  dicatat_oleh integer [ref: > users.id]
+  created_at text [not null, default: `strftime('%Y-%m-%dT%H:%M:%SZ','now')`]
+  updated_at text [not null]
+
+  indexes {
+    (enrollment_id, training_session_id) [unique, name: 'ux_attendance_enrollment_session']
+  }
+
+  Note: 'FK enrollment dan session ON DELETE CASCADE; dicatat_oleh ON DELETE SET NULL.'
+}
+
+Table assessments {
+  id integer [pk, increment]
+  program_id integer [not null, ref: > programs.id]
+  nama text [not null]
+  bobot real [not null, note: 'CHECK 0..100']
+  urutan integer [not null, default: 0]
+  created_at text [not null, default: `strftime('%Y-%m-%dT%H:%M:%SZ','now')`]
+  updated_at text [not null]
+
+  indexes {
+    (program_id, nama) [unique, name: 'ux_assessments_program_nama']
+  }
+
+  Note: 'FK ON DELETE CASCADE. Total bobot per program = 100 divalidasi aplikasi.'
+}
+
+Table grades {
+  id integer [pk, increment]
+  enrollment_id integer [not null, ref: > enrollments.id]
+  assessment_id integer [not null, ref: > assessments.id]
+  nilai real [not null, note: 'CHECK 0..100']
+  catatan text
+  dinilai_oleh integer [ref: > users.id]
+  dinilai_at text [not null]
+  updated_at text [not null]
+
+  indexes {
+    (enrollment_id, assessment_id) [unique, name: 'ux_grades_enrollment_assessment']
+  }
+
+  Note: 'FK enrollment CASCADE; assessment RESTRICT; dinilai_oleh SET NULL. Perubahan nilai direkam di audit_logs.'
+}
+
+Table certificate_templates {
+  id integer [pk, increment]
+  nama text [not null]
+  versi integer [not null, default: 1, note: 'CHECK > 0']
+  file_path text [not null]
+  is_active integer [not null, default: 1, note: '0 | 1']
+  created_by integer [ref: > users.id]
+  created_at text [not null, default: `strftime('%Y-%m-%dT%H:%M:%SZ','now')`]
+  updated_at text [not null]
+
+  indexes {
+    (nama, versi) [unique, name: 'ux_certificate_templates_nama_versi']
+  }
+
+  Note: 'FK created_by ON DELETE SET NULL.'
+}
+
+Table certificates {
+  id integer [pk, increment]
+  enrollment_id integer [not null, ref: > enrollments.id]
+  template_id integer [not null, ref: > certificate_templates.id]
+  nomor_sertifikat text [not null, unique]
+  qr_token text [not null, unique]
+  file_path text
+  file_hash text [not null, note: 'SHA-256 PDF']
+  status text [not null, default: 'aktif', note: 'aktif | dibatalkan | diganti']
+  tanggal_terbit text [not null]
+  diterbitkan_oleh integer [ref: > users.id]
+  dibatalkan_at text
+  alasan_pembatalan text
+  replaced_by_id integer [ref: > certificates.id]
+  created_at text [not null, default: `strftime('%Y-%m-%dT%H:%M:%SZ','now')`]
+  updated_at text [not null]
+
+  indexes {
+    (status, tanggal_terbit) [name: 'ix_certificates_status_terbit']
+    (enrollment_id) [unique, name: 'ux_certificates_active_enrollment']
+  }
+
+  Note: 'Partial unique ux_certificates_active_enrollment WHERE status = aktif. CHECK (status <> dibatalkan OR dibatalkan_at IS NOT NULL). enrollment RESTRICT, template RESTRICT, diterbitkan_oleh SET NULL, replaced_by SET NULL.'
+}
+
+Table certificate_reissues {
+  id integer [pk, increment]
+  original_certificate_id integer [not null, ref: > certificates.id]
+  new_certificate_id integer [unique, ref: > certificates.id]
+  alasan text [not null, note: 'CHECK length(trim(alasan)) > 0']
+  pemohon_nama text
+  pemohon_kontak text
+  status text [not null, default: 'diajukan', note: 'diajukan | disetujui | ditolak | selesai']
+  diproses_oleh integer [not null, ref: > users.id]
+  disetujui_oleh integer [ref: > users.id]
+  created_at text [not null, default: `strftime('%Y-%m-%dT%H:%M:%SZ','now')`]
+  decided_at text
+  completed_at text
+
+  indexes {
+    (original_certificate_id) [name: 'ix_certificate_reissues_original']
+    (status, created_at) [name: 'ix_certificate_reissues_status']
+  }
+
+  Note: 'CHECK (status <> selesai OR new_certificate_id IS NOT NULL). original RESTRICT, new SET NULL, diproses RESTRICT, disetujui SET NULL.'
+}
+
+Table certificate_number_sequences {
+  id integer [pk, increment]
+  program_id integer [not null, ref: > programs.id]
+  tahun integer [not null, note: 'CHECK 1900..2200']
+  prefix text [not null]
+  last_number integer [not null, default: 0, note: 'CHECK >= 0']
+  updated_at text [not null]
+
+  indexes {
+    (program_id, tahun) [unique, name: 'ux_certificate_sequences_program_tahun']
+  }
+
+  Note: 'Alokasi atomik: BEGIN IMMEDIATE; UPDATE ... SET last_number = last_number + 1 RETURNING last_number. FK RESTRICT.'
+}
+
+Table audit_logs {
+  id integer [pk, increment]
+  actor_user_id integer [ref: > users.id]
+  action text [not null, note: 'LOGIN | CREATE | UPDATE | DELETE | ISSUE_CERTIFICATE | REISSUE | REVOKE | EXPORT | VERIFY']
+  entity_type text [not null]
+  entity_id integer
+  before_data text [note: 'JSON, CHECK json_valid']
+  after_data text [note: 'JSON, CHECK json_valid']
+  ip_address text
+  user_agent text
+  request_id text
+  created_at text [not null, default: `strftime('%Y-%m-%dT%H:%M:%SZ','now')`]
+
+  indexes {
+    (entity_type, entity_id) [name: 'ix_audit_entity']
+    (actor_user_id, created_at) [name: 'ix_audit_actor_time']
+    (action, created_at) [name: 'ix_audit_action_time']
+  }
+
+  Note: 'Append-only: trigger blokir UPDATE/DELETE. actor ON DELETE SET NULL.'
+}
+
+Table verification_logs {
+  id integer [pk, increment]
+  nomor_sertifikat_input text [not null]
+  certificate_id integer [ref: > certificates.id]
+  hasil text [not null, note: 'valid | dibatalkan | tidak_ditemukan']
+  ip_address text [not null]
+  user_agent text
+  created_at text [not null, default: `strftime('%Y-%m-%dT%H:%M:%SZ','now')`]
+
+  indexes {
+    (ip_address, created_at) [name: 'ix_verification_ip_time']
+    (nomor_sertifikat_input, created_at) [name: 'ix_verification_nomor_time']
+  }
+
+  Note: 'FK certificate ON DELETE SET NULL. Basis rate limiting per IP per menit.'
+}
+
+Table retention_policies {
+  id integer [pk, increment]
+  nama text [not null, unique]
+  entity_type text [not null, note: 'participants | enrollments | certificates']
+  basis text [not null, note: 'tanggal_selesai_batch | tanggal_terbit_sertifikat | tanggal_daftar']
+  retention_years integer [not null, default: 5, note: 'CHECK >= 0']
+  action text [not null, note: 'arsipkan | cold_storage | hapus_lembut']
+  is_active integer [not null, default: 1, note: '0 | 1']
+  created_by integer [ref: > users.id]
+  created_at text [not null, default: `strftime('%Y-%m-%dT%H:%M:%SZ','now')`]
+  updated_at text [not null]
+
+  Note: 'CHECK entity_type, basis, action sesuai daftar. created_by ON DELETE SET NULL.'
+}
+
+Table data_imports {
+  id integer [pk, increment]
+  file_name text [not null]
+  tipe text [not null, note: 'peserta | nilai | sertifikat']
+  total_rows integer [not null, default: 0, note: 'CHECK >= 0']
+  success_rows integer [not null, default: 0, note: 'CHECK >= 0']
+  failed_rows integer [not null, default: 0, note: 'CHECK >= 0']
+  status text [not null, default: 'proses', note: 'proses | selesai | selesai_dengan_error | gagal']
+  error_report_path text
+  imported_by integer [ref: > users.id]
+  created_at text [not null, default: `strftime('%Y-%m-%dT%H:%M:%SZ','now')`]
+  finished_at text
+
+  Note: 'imported_by ON DELETE SET NULL.'
+}
+
+TableGroup auth {
+  users
+  user_sessions
+}
+
+TableGroup master_data {
+  programs
+  batches
+  participants
+}
+
+TableGroup transaksi {
+  enrollments
+  training_sessions
+  attendance
+  assessments
+  grades
+}
+
+TableGroup sertifikasi {
+  certificate_templates
+  certificates
+  certificate_reissues
+  certificate_number_sequences
+}
+
+TableGroup pendukung {
+  audit_logs
+  verification_logs
+  retention_policies
+  data_imports
+}
