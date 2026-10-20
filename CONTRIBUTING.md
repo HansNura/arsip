@@ -193,6 +193,18 @@ Jangan menyelesaikan konflik dengan menghapus perubahan rekan tim secara sembara
 - Setelah merge, hapus branch fitur.
 - Jika perlu memperbaiki setelah review, push commit tambahan ke branch yang sama.
 
+### 7.1 Branch Protection `main`
+
+Branch `main` dilindungi dengan aturan:
+
+- Wajib Pull Request sebelum merge.
+- Wajib status check **Lint & Test** dan **Build assets** hijau.
+- Minimal 1 approval dari anggota tim lain.
+- Approval lama dibatalkan jika ada push baru.
+- Force push dan penghapusan branch `main` dilarang.
+
+Admin memiliki kemampuan bypass untuk keadaan darurat. Gunakan hanya jika benar-benar diperlukan dan catat alasannya di PR.
+
 ## 8. Keamanan dan Data
 
 - Jangan pernah commit `.env` atau kredensial.
