@@ -102,6 +102,7 @@ database/
 docs/
   erd.md                 ERD, kamus data, aturan bisnis
   erd.dbml               ERD untuk dbdiagram.io
+  laporan-adpl.md        Draft laporan ADPL sesuai format kampus
 resources/views/         Blade: layout, home, auth, dashboard, verify, admin
 tests/                   Auth, RBAC, verifikasi, constraint database
 ```
