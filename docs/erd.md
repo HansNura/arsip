@@ -780,6 +780,8 @@ PRAGMA synchronous = NORMAL;   -- aman dengan WAL untuk sebagian besar kasus
 - `audit_logs` dan `verification_logs` tidak memakai `updated_at`.
 - Autentikasi memakai session Laravel; `user_sessions` digantikan tabel `sessions`.
 - Nomor sertifikat dialokasikan secara atomik oleh `App\Services\CertificateNumberGenerator` (ARSIP-008) dengan format `{prefix}/{tahun}/{urut:04d}`. Prefix default diambil dari `programs.kode_program` dan disimpan pada `certificate_number_sequences`; seeder hanya menyiapkan data demo.
+- PDF sertifikat dirender dari `resources/views/certificates/pdf.blade.php` memakai dompdf, disimpan di disk privat (`storage/app/private/certificates/{tahun}/`), dan `file_hash` dihitung dari isi PDF final. Unduhan hanya tersedia lewat route terautentikasi.
+- Penerbitan massal memproses per enrollment dalam transaksi terpisah agar tidak menahan kunci tulis SQLite terlalu lama; kegagalan satu peserta tidak membatalkan yang lain dan dicatat pada ringkasan hasil.
 
 ## 10. Asumsi & Pertanyaan Terbuka
 
