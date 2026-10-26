@@ -33,23 +33,21 @@
 
     <div class="mt-8 grid gap-6 lg:grid-cols-[1.2fr_0.8fr]">
         <section class="rounded-2xl border border-slate-200 bg-white p-6">
-            <h2 class="text-lg font-semibold tracking-tight text-slate-900">Modul yang siap dikembangkan</h2>
-            <p class="mt-1 text-sm text-slate-600">Fondasi database, autentikasi, dan RBAC sudah aktif.</p>
+            <h2 class="text-lg font-semibold tracking-tight text-slate-900">Manajemen pelatihan</h2>
+            <p class="mt-1 text-sm text-slate-600">Kelola pendaftaran, absensi, dan nilai peserta per angkatan.</p>
 
             <ul class="mt-5 divide-y divide-slate-100 text-sm">
                 @foreach ([
-                    ['Data Peserta', 'CRUD peserta, angkatan, presensi, dan nilai.', 'Sprint 2'],
-                    ['Sertifikasi', 'Generator nomor unik, PDF, QR, dan tanda tangan.', 'Sprint 3'],
-                    ['Verifikasi Publik', 'Halaman publik sudah tersedia dan mencatat log.', 'Sprint 4'],
-                    ['Pelaporan & Retensi', 'Rekap kelulusan dan kebijakan arsip.', 'Sprint 5'],
-                    ['Audit & Reissue', 'Penerbitan ulang dan jejak audit.', 'Sprint 6'],
-                ] as [$modul, $description, $sprint])
+                    ['Program Pelatihan', 'Atur katalog program dan standar kelulusan.', route('admin.programs.index')],
+                    ['Angkatan & Kelas', 'Buat angkatan, atur jadwal, dan kelola pesertanya.', route('admin.batches.index')],
+                    ['Pencarian Peserta', 'Filter cepat berdasarkan NIK, nama, tahun, dan kelas.', route('admin.participants.index')],
+                ] as [$modul, $description, $url])
                     <li class="flex items-start justify-between gap-4 py-3">
-                        <div>
+                        <a href="{{ $url }}" class="block">
                             <p class="font-medium text-slate-900">{{ $modul }}</p>
                             <p class="mt-0.5 text-slate-600">{{ $description }}</p>
-                        </div>
-                        <span class="shrink-0 rounded-full bg-slate-100 px-2.5 py-1 text-xs font-medium text-slate-600">{{ $sprint }}</span>
+                        </a>
+                        <span class="shrink-0 text-sm font-semibold text-emerald-700">Buka &rarr;</span>
                     </li>
                 @endforeach
             </ul>
@@ -61,6 +59,11 @@
                 <a href="{{ route('verify.index') }}" class="block rounded-xl border border-slate-200 p-4 transition hover:border-emerald-300 hover:bg-emerald-50/50">
                     <p class="text-sm font-semibold text-slate-900">Verifikasi sertifikat</p>
                     <p class="mt-1 text-sm text-slate-600">Cek nomor sertifikat dan status legalitasnya.</p>
+                </a>
+
+                <a href="{{ route('admin.participants.index') }}" class="block rounded-xl border border-slate-200 p-4 transition hover:border-emerald-300 hover:bg-emerald-50/50">
+                    <p class="text-sm font-semibold text-slate-900">Cari peserta</p>
+                    <p class="mt-1 text-sm text-slate-600">Cari berdasarkan NIK, nama, tahun, atau kelas.</p>
                 </a>
 
                 @if (auth()->user()->role === \App\Enums\UserRole::Admin)
