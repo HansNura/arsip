@@ -35,31 +35,66 @@ class CertificateVerificationController extends Controller
         ]);
     }
 
+    public function showByToken(string $token): View
+    {
+        $certificate = DB::table('v_public_certificate')
+            ->join('certificates', 'certificates.id', '=', 'v_public_certificate.certificate_id')
+            ->where('certificates.qr_token', $token)
+            ->select('v_public_certificate.*')
+            ->first();
+
+        $result = $this->resultFor($certificate);
+        $nomor = $certificate?->nomor_sertifikat ?? '';
+
+        $this->logVerification(
+            $nomor !== '' ? $nomor : Str::limit($token, 120, ''),
+            $certificate?->certificate_id,
+            $result,
+        );
+
+        return view('verify.index', [
+            'certificate' => $certificate,
+            'result' => $result,
+            'nomor' => $nomor,
+            'viaQr' => true,
+        ]);
+    }
+
     private function renderResult(string $nomor): View
     {
         $certificate = DB::table('v_public_certificate')
             ->where('nomor_sertifikat', $nomor)
             ->first();
 
-        $result = match (true) {
-            $certificate === null => VerificationResult::TidakDitemukan,
-            $certificate->status === CertificateStatus::Aktif->value => VerificationResult::Valid,
-            default => VerificationResult::Dibatalkan,
-        };
+        $result = $this->resultFor($certificate);
 
-        VerificationLog::create([
-            'nomor_sertifikat_input' => $nomor,
-            'certificate_id' => $certificate?->certificate_id,
-            'hasil' => $result,
-            'ip_address' => request()->ip() ?? 'unknown',
-            'user_agent' => Str::limit((string) request()->userAgent(), 1000, ''),
-            'created_at' => now(),
-        ]);
+        $this->logVerification($nomor, $certificate?->certificate_id, $result);
 
         return view('verify.index', [
             'certificate' => $certificate,
             'result' => $result,
             'nomor' => $nomor,
+        ]);
+    }
+
+    private function resultFor(?object $certificate): VerificationResult
+    {
+        return match (true) {
+            $certificate === null => VerificationResult::TidakDitemukan,
+            $certificate->status === CertificateStatus::Aktif->value => VerificationResult::Valid,
+            default => VerificationResult::Dibatalkan,
+        };
+    }
+
+    private function logVerification(string $input, ?int $certificateId, VerificationResult $result): void
+    {
+        VerificationLog::create([
+            'nomor_sertifikat_input' => Str::limit($input, 120, ''),
+            'certificate_id' => $certificateId,
+            'hasil' => $result,
+            'ip_address' => request()->ip() ?? 'unknown',
+            'user_agent' => Str::limit((string) request()->userAgent(), 1000, ''),
+            'created_at' => now(),
         ]);
     }
 }

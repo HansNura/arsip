@@ -70,6 +70,7 @@ composer run dev                   # server + queue + log + Vite
 | --- | --- | --- |
 | `/` | Publik | Landing page |
 | `/verify` | Publik | Verifikasi nomor sertifikat |
+| `/verify/s/{token}` | Publik | Verifikasi lewat QR code (token acak) |
 | `/login` | Publik | Login staf |
 | `/dashboard` | Login | Ringkasan data |
 | `/profile` | Login | Informasi akun dan ubah kata sandi |
@@ -87,6 +88,9 @@ composer run dev                   # server + queue + log + Vite
 - RBAC melalui middleware `role`; admin tidak dapat menonaktifkan atau menurunkan peran akun sendiri.
 - Email dinormalisasi ke lowercase dan unik secara case-insensitive.
 - Verifikasi publik hanya membaca view `v_public_certificate` (tanpa NIK, alamat, atau email).
+- QR code memakai `qr_token` acak, bukan nomor sertifikat; halaman verifikasi tetap hanya menampilkan kolom aman.
+- PDF sertifikat disimpan di disk privat dan hanya dapat diunduh lewat route terautentikasi.
+- Tanda tangan pada PDF berupa **gambar** (bukan tanda tangan kriptografis/PKI); keaslian dijaga `file_hash` SHA-256 dan token verifikasi.
 - Log verifikasi disimpan di `verification_logs`.
 - Audit login/logout disimpan di `audit_logs`; tabel ini append-only lewat trigger SQLite.
 - Partial unique index memastikan satu sertifikat `aktif` per enrollment.
@@ -136,6 +140,6 @@ Lihat `Rencana Kerja Tim Projek.xlsx` dan `docs/erd.md`.
 - [x] ARSIP-008: generator nomor sertifikat unik per program dan tahun
 - [ ] CRUD peserta dan sertifikat
 - [x] ARSIP-009: penerbitan sertifikat, penyimpanan PDF privat, dan unduhan terautentikasi
-- [ ] ARSIP-010: QR verifikasi dan gambar tanda tangan sertifikat
+- [x] ARSIP-010: QR verifikasi berbasis token dan gambar tanda tangan sertifikat
 - [ ] Pelaporan, retensi otomatis, reissue, dan deployment production
 ```

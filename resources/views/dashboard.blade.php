@@ -41,6 +41,7 @@
                     ['Program Pelatihan', 'Atur katalog program dan standar kelulusan.', route('admin.programs.index')],
                     ['Angkatan & Kelas', 'Buat angkatan, atur jadwal, dan kelola pesertanya.', route('admin.batches.index')],
                     ['Pencarian Peserta', 'Filter cepat berdasarkan NIK, nama, tahun, dan kelas.', route('admin.participants.index')],
+                    ['Sertifikat', 'Terbitkan PDF, kelola QR verifikasi, dan gambar tanda tangan.', route('admin.certificates.index')],
                 ] as [$modul, $description, $url])
                     <li class="flex items-start justify-between gap-4 py-3">
                         <a href="{{ $url }}" class="block">
