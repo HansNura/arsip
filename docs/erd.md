@@ -779,7 +779,7 @@ PRAGMA synchronous = NORMAL;   -- aman dengan WAL untuk sebagian besar kasus
 - Partial unique index dan trigger append-only dibuat lewat `DB::statement()` / `DB::unprepared()` pada migrasi `2026_10_19_000017_create_views_and_indexes.php`.
 - `audit_logs` dan `verification_logs` tidak memakai `updated_at`.
 - Autentikasi memakai session Laravel; `user_sessions` digantikan tabel `sessions`.
-- Nomor sertifikat masih dibuat manual pada seeder; generator atomik akan diimplementasikan pada Sprint 3.
+- Nomor sertifikat dialokasikan secara atomik oleh `App\Services\CertificateNumberGenerator` (ARSIP-008) dengan format `{prefix}/{tahun}/{urut:04d}`. Prefix default diambil dari `programs.kode_program` dan disimpan pada `certificate_number_sequences`; seeder hanya menyiapkan data demo.
 
 ## 10. Asumsi & Pertanyaan Terbuka
 

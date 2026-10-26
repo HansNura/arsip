@@ -132,7 +132,8 @@ Lihat `Rencana Kerja Tim Projek.xlsx` dan `docs/erd.md`.
 - [x] ARSIP-003: login/logout, RBAC admin/staf, manajemen pengguna, perubahan password, audit auth
 - [x] ARSIP-011/012 Sebagian: endpoint dan halaman verifikasi publik
 - [x] CRUD program dan angkatan, pendaftaran peserta, absensi per pertemuan, nilai akhir, dan pencarian multi-filter
+- [x] ARSIP-008: generator nomor sertifikat unik per program dan tahun
 - [ ] CRUD peserta dan sertifikat
-- [ ] Generator nomor sertifikat, PDF, QR, dan tanda tangan digital
+- [ ] ARSIP-009/010: generator PDF, QR verifikasi, dan gambar tanda tangan sertifikat
 - [ ] Pelaporan, retensi otomatis, reissue, dan deployment production
 ```
