@@ -8,4 +8,10 @@ return [
 
     'disk' => env('CERTIFICATE_DISK', 'local'),
 
+    'signature_path' => env('CERTIFICATE_SIGNATURE_PATH'),
+
+    'penandatangan_nama' => env('CERTIFICATE_PENANDATANGAN_NAMA'),
+
+    'penandatangan_jabatan' => env('CERTIFICATE_PENANDATANGAN_JABATAN'),
+
 ];

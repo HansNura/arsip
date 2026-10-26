@@ -39,7 +39,7 @@
             <ul class="mt-5 divide-y divide-slate-100 text-sm">
                 @foreach ([
                     ['Data Peserta', 'CRUD peserta, angkatan, presensi, dan nilai.', 'Sprint 2'],
-                    ['Sertifikasi', 'Generator nomor unik, PDF, QR, dan tanda tangan.', 'Sprint 3'],
+                    ['Sertifikasi', 'Generator nomor unik, PDF, QR, dan gambar tanda tangan.', 'Sprint 3'],
                     ['Verifikasi Publik', 'Halaman publik sudah tersedia dan mencatat log.', 'Sprint 4'],
                     ['Pelaporan & Retensi', 'Rekap kelulusan dan kebijakan arsip.', 'Sprint 5'],
                     ['Audit & Reissue', 'Penerbitan ulang dan jejak audit.', 'Sprint 6'],

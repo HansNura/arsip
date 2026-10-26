@@ -207,6 +207,9 @@ Table certificate_templates {
   nama text [not null]
   versi integer [not null, default: 1, note: 'CHECK > 0']
   file_path text [not null]
+  tanda_tangan_path text
+  nama_penandatangan text
+  jabatan_penandatangan text
   is_active integer [not null, default: 1, note: '0 | 1']
   created_by integer [ref: > users.id]
   created_at text [not null, default: `strftime('%Y-%m-%dT%H:%M:%SZ','now')`]

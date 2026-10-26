@@ -19,6 +19,8 @@ final class CertificateIssuer
     public function __construct(
         private CertificateNumberGenerator $numbers,
         private CertificatePdfRenderer $pdf,
+        private CertificateQrCode $qr,
+        private CertificateSignature $signature,
     ) {}
 
     public function issue(
@@ -44,8 +46,9 @@ final class CertificateIssuer
         $tahun = (int) now()->year;
         $nomor = $this->numbers->generate($enrollment->batch->program, $tahun);
         $qrToken = Str::random(48);
+        $qrUrl = route('verify.token', ['token' => $qrToken]);
 
-        $pdf = $this->pdf->render($this->viewData($enrollment, $nomor, $qrToken));
+        $pdf = $this->pdf->render($this->viewData($enrollment, $template, $nomor, $qrToken, $qrUrl));
         $path = $this->pdf->store($pdf, $nomor, $tahun);
 
         try {
@@ -132,8 +135,13 @@ final class CertificateIssuer
     /**
      * @return array<string, mixed>
      */
-    private function viewData(Enrollment $enrollment, string $nomor, string $qrToken): array
-    {
+    private function viewData(
+        Enrollment $enrollment,
+        CertificateTemplate $template,
+        string $nomor,
+        string $qrToken,
+        string $qrUrl,
+    ): array {
         $program = $enrollment->batch->program;
 
         return [
@@ -145,10 +153,11 @@ final class CertificateIssuer
             'tahun' => $enrollment->batch->tahun,
             'tanggal_terbit' => now()->format('d-m-Y'),
             'qr_token' => $qrToken,
-            'qr_data_uri' => null,
-            'signature_data_uri' => null,
-            'nama_penandatangan' => null,
-            'jabatan_penandatangan' => null,
+            'qr_url' => $qrUrl,
+            'qr_data_uri' => $this->qr->dataUri($qrUrl),
+            'signature_data_uri' => $this->signature->dataUri($template),
+            'nama_penandatangan' => $this->signature->name($template),
+            'jabatan_penandatangan' => $this->signature->title($template),
         ];
     }
 }

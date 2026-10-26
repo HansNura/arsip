@@ -12,6 +12,9 @@ class CertificateTemplate extends Model
         'nama',
         'versi',
         'file_path',
+        'tanda_tangan_path',
+        'nama_penandatangan',
+        'jabatan_penandatangan',
         'is_active',
         'created_by',
     ];

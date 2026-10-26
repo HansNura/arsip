@@ -447,6 +447,9 @@ Template desain sertifikat.
 | nama | TEXT | NOT NULL | Nama template |
 | versi | INTEGER | NOT NULL DEFAULT 1, CHECK > 0 | Versi template |
 | file_path | TEXT | NOT NULL | Path file template |
+| tanda_tangan_path | TEXT | NULL | Path gambar tanda tangan pada disk privat |
+| nama_penandatangan | TEXT | NULL | Nama penandatangan pada PDF |
+| jabatan_penandatangan | TEXT | NULL | Jabatan penandatangan pada PDF |
 | is_active | INTEGER | NOT NULL DEFAULT 1, CHECK in (0,1) | Status aktif |
 | created_by | INTEGER | NULL, FK → users.id, ON DELETE SET NULL | Pembuat |
 | created_at | TEXT | NOT NULL | Timestamp dibuat |
@@ -703,6 +706,8 @@ WHERE p.deleted_at IS NULL;
 
 `certificate_id` hanya dipakai server untuk mencatat `verification_logs`; tidak ditampilkan ke publik.
 
+QR code pada PDF mengarah ke `/verify/s/{qr_token}`. Token dicari pada `certificates.qr_token`, lalu hasilnya dibaca dari `v_public_certificate`; setiap permintaan tetap dicatat pada `verification_logs`.
+
 Setiap pemanggilan `/verify` menulis `verification_logs`; rate limiting dihitung dari `(ip_address, created_at)` pada 1 menit terakhir.
 
 ### 7.3 Penerbitan ulang (FR-06)
@@ -782,6 +787,7 @@ PRAGMA synchronous = NORMAL;   -- aman dengan WAL untuk sebagian besar kasus
 - Nomor sertifikat dialokasikan secara atomik oleh `App\Services\CertificateNumberGenerator` (ARSIP-008) dengan format `{prefix}/{tahun}/{urut:04d}`. Prefix default diambil dari `programs.kode_program` dan disimpan pada `certificate_number_sequences`; seeder hanya menyiapkan data demo.
 - PDF sertifikat dirender dari `resources/views/certificates/pdf.blade.php` memakai dompdf, disimpan di disk privat (`storage/app/private/certificates/{tahun}/`), dan `file_hash` dihitung dari isi PDF final. Unduhan hanya tersedia lewat route terautentikasi.
 - Penerbitan massal memproses per enrollment dalam transaksi terpisah agar tidak menahan kunci tulis SQLite terlalu lama; kegagalan satu peserta tidak membatalkan yang lain dan dicatat pada ringkasan hasil.
+- Tanda tangan sertifikat bersifat visual: gambar PNG/JPG dari `certificate_templates.tanda_tangan_path` (fallback ke konfigurasi `certificate.signature_path`). Tidak ada tanda tangan kriptografis/PKI; keaslian dijaga `file_hash` SHA-256 dan `qr_token` acak yang mengarah ke halaman verifikasi.
 
 ## 10. Asumsi & Pertanyaan Terbuka
 

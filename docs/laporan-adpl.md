@@ -295,7 +295,7 @@ Penjelasan komponen:
 | F-03 | Manajemen Program dan Angkatan | CRUD program pelatihan, angkatan, kelas, kuota, dan periode. | ARSIP-004 |
 | F-04 | Manajemen Peserta | CRUD biodata peserta, pendaftaran pada angkatan, pencarian multi-parameter, dan import data lama. | FR-01, ARSIP-005, ARSIP-006, ARSIP-007 |
 | F-05 | Presensi dan Nilai | Pencatatan kehadiran per sesi, komponen nilai, bobot, nilai akhir, dan status kelulusan. | FR-01, FR-05 |
-| F-06 | Penerbitan Sertifikat | Alokasi nomor unik, pemilihan template, pembuatan PDF, QR code, hash, dan tanda tangan digital. | FR-02 |
+| F-06 | Penerbitan Sertifikat | Alokasi nomor unik, pemilihan template, pembuatan PDF, QR code, hash, dan gambar tanda tangan (bukan tanda tangan kriptografis/PKI). | FR-02 |
 | F-07 | Verifikasi Publik | Pengecekan keaslian sertifikat melalui nomor unik tanpa login dan tanpa data sensitif. | FR-03 |
 | F-08 | Pelaporan | Rekap kelulusan per program/periode dan ekspor PDF/Excel. | FR-05 |
 | F-09 | Retensi Data | Kebijakan masa simpan, arsip dingin, dan soft delete. | FR-04 |
@@ -1262,7 +1262,7 @@ Perancangan antarmuka mengikuti prinsip berikut:
 |                                                                  |
 | Modul yang siap dikembangkan                                      |
 | - Data Peserta       CRUD peserta, angkatan, presensi, nilai      |
-| - Sertifikasi        Nomor unik, PDF, QR, tanda tangan            |
+| - Sertifikasi        Nomor unik, PDF, QR, gambar tanda tangan            |
 | - Verifikasi Publik  Halaman publik dan log verifikasi            |
 +------------------------------------------------------------------+
 ```

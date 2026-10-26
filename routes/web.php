@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\AdminCertificateController;
+use App\Http\Controllers\AdminCertificateTemplateController;
 use App\Http\Controllers\AdminUserController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\CertificateVerificationController;
@@ -16,6 +17,11 @@ Route::get('/verify', [CertificateVerificationController::class, 'index'])
 Route::post('/verify', [CertificateVerificationController::class, 'check'])
     ->middleware('throttle:20,1')
     ->name('verify.check');
+
+Route::get('/verify/s/{token}', [CertificateVerificationController::class, 'showByToken'])
+    ->where('token', '[A-Za-z0-9]{16,64}')
+    ->middleware('throttle:60,1')
+    ->name('verify.token');
 
 Route::middleware('guest')->group(function () {
     Route::get('/login', [AuthController::class, 'showLogin'])->name('login');
@@ -38,6 +44,8 @@ Route::middleware(['auth', 'role:admin,staf_arsip'])
     ->name('admin.')
     ->group(function () {
         Route::get('/certificates', [AdminCertificateController::class, 'index'])->name('certificates.index');
+        Route::get('/certificate-template', [AdminCertificateTemplateController::class, 'edit'])->name('certificate-templates.edit');
+        Route::put('/certificate-template', [AdminCertificateTemplateController::class, 'update'])->name('certificate-templates.update');
         Route::post('/certificates/batch', [AdminCertificateController::class, 'storeBatchRequest'])->name('certificates.store-batch-request');
         Route::post('/enrollments/{enrollment}/certificate', [AdminCertificateController::class, 'store'])->name('certificates.store');
         Route::post('/batches/{batch}/certificates', [AdminCertificateController::class, 'storeBatch'])->name('certificates.store-batch');
