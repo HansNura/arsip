@@ -6,4 +6,6 @@ return [
 
     'max_attempts' => (int) env('CERTIFICATE_NUMBER_MAX_ATTEMPTS', 3),
 
+    'disk' => env('CERTIFICATE_DISK', 'local'),
+
 ];

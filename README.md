@@ -73,6 +73,7 @@ composer run dev                   # server + queue + log + Vite
 | `/login` | Publik | Login staf |
 | `/dashboard` | Login | Ringkasan data |
 | `/profile` | Login | Informasi akun dan ubah kata sandi |
+| `/admin/certificates` | Login | Terbitkan, cari, dan unduh sertifikat peserta yang lulus |
 | `/admin/users` | Admin | Daftar, tambah, edit, aktif/nonaktif pengguna |
 
 ## Keamanan yang Sudah Aktif
@@ -129,7 +130,8 @@ Lihat `Rencana Kerja Tim Projek.xlsx` dan `docs/erd.md`.
 - [x] ARSIP-003: login/logout, RBAC admin/staf, manajemen pengguna, perubahan password, audit auth
 - [x] ARSIP-011/012 Sebagian: endpoint dan halaman verifikasi publik
 - [x] ARSIP-008: generator nomor sertifikat unik per program dan tahun
+- [x] ARSIP-009: penerbitan sertifikat, penyimpanan PDF privat, dan unduhan terautentikasi
 - [ ] Modul CRUD peserta, angkatan, nilai, dan sertifikat
-- [ ] ARSIP-009/010: generator PDF, QR verifikasi, dan gambar tanda tangan sertifikat
+- [ ] ARSIP-010: QR verifikasi dan gambar tanda tangan sertifikat
 - [ ] Pelaporan, retensi otomatis, reissue, dan deployment production
 ```
