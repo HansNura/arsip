@@ -8,6 +8,9 @@
             <h1 class="text-3xl font-semibold tracking-tight text-slate-900">Sertifikat</h1>
             <p class="mt-2 text-sm text-slate-600">Terbitkan, pantau, dan unduh sertifikat peserta yang lulus.</p>
         </div>
+        <a href="{{ route('admin.certificate-templates.edit') }}" class="rounded-xl border border-slate-300 px-4 py-2.5 text-sm font-semibold text-slate-700 transition hover:border-slate-400 hover:bg-slate-50">
+            Template &amp; tanda tangan
+        </a>
     </div>
 
     @if ($errors->has('certificate') || $errors->has('enrollment') || $errors->has('template'))

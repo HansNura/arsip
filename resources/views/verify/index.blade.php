@@ -78,9 +78,15 @@
                         </p>
                     @endif
                 @else
-                    <p class="mt-3 text-sm text-amber-800">
-                        Nomor <span class="font-mono">{{ $nomor }}</span> tidak ada dalam arsip. Periksa kembali penulisan nomor sertifikat.
-                    </p>
+                    @if ($viaQr ?? false)
+                        <p class="mt-3 text-sm text-amber-800">
+                            Tautan verifikasi tidak dikenali. Periksa kembali tautan atau pindai ulang QR code pada sertifikat.
+                        </p>
+                    @else
+                        <p class="mt-3 text-sm text-amber-800">
+                            Nomor <span class="font-mono">{{ $nomor }}</span> tidak ada dalam arsip. Periksa kembali penulisan nomor sertifikat.
+                        </p>
+                    @endif
                 @endif
             </div>
         @endisset

@@ -56,7 +56,7 @@
     <section class="mt-16 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         @foreach ([
             ['Data Peserta', 'Biodata, status pendaftaran, presensi, dan rekap nilai per angkatan.'],
-            ['Sertifikat Unik', 'Nomor anti-duplikat, PDF otomatis, QR code, dan tanda tangan digital.'],
+            ['Sertifikat Unik', 'Nomor anti-duplikat, PDF otomatis, QR code, dan gambar tanda tangan.'],
             ['Verifikasi Publik', 'Pengecekan keaslian oleh HR tanpa login dan tanpa data sensitif.'],
             ['Jejak Audit', 'Pencatatan penerbitan ulang, alasan, pelaksana, dan timestamp.'],
         ] as [$title, $description])
