@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\AdminCertificateController;
 use App\Http\Controllers\AdminUserController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\CertificateVerificationController;
@@ -52,6 +53,17 @@ Route::middleware('auth')->group(function () {
     Route::put('/admin/batches/{batch}/enrollments/{enrollment}/score', [TrainingController::class, 'updateScore'])->name('admin.batches.scores.update');
     Route::get('/admin/participants', [TrainingController::class, 'participants'])->name('admin.participants.index');
 });
+
+Route::middleware(['auth', 'role:admin,staf_arsip'])
+    ->prefix('admin')
+    ->name('admin.')
+    ->group(function () {
+        Route::get('/certificates', [AdminCertificateController::class, 'index'])->name('certificates.index');
+        Route::post('/certificates/batch', [AdminCertificateController::class, 'storeBatchRequest'])->name('certificates.store-batch-request');
+        Route::post('/enrollments/{enrollment}/certificate', [AdminCertificateController::class, 'store'])->name('certificates.store');
+        Route::post('/batches/{batch}/certificates', [AdminCertificateController::class, 'storeBatch'])->name('certificates.store-batch');
+        Route::get('/certificates/{certificate}/download', [AdminCertificateController::class, 'download'])->name('certificates.download');
+    });
 
 Route::middleware(['auth', 'role:admin'])
     ->prefix('admin')

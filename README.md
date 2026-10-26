@@ -76,6 +76,7 @@ composer run dev                   # server + queue + log + Vite
 | `/admin/programs` | Login | CRUD program pelatihan |
 | `/admin/batches` | Login | CRUD angkatan dan pengelolaan pendaftaran, absensi, serta nilai |
 | `/admin/participants` | Login | Pencarian peserta dengan filter NIK, nama, tahun, dan kelas |
+| `/admin/certificates` | Login | Terbitkan, cari, dan unduh sertifikat peserta yang lulus |
 | `/admin/users` | Admin | Daftar, tambah, edit, aktif/nonaktif pengguna |
 
 ## Keamanan yang Sudah Aktif
@@ -134,6 +135,7 @@ Lihat `Rencana Kerja Tim Projek.xlsx` dan `docs/erd.md`.
 - [x] CRUD program dan angkatan, pendaftaran peserta, absensi per pertemuan, nilai akhir, dan pencarian multi-filter
 - [x] ARSIP-008: generator nomor sertifikat unik per program dan tahun
 - [ ] CRUD peserta dan sertifikat
-- [ ] ARSIP-009/010: generator PDF, QR verifikasi, dan gambar tanda tangan sertifikat
+- [x] ARSIP-009: penerbitan sertifikat, penyimpanan PDF privat, dan unduhan terautentikasi
+- [ ] ARSIP-010: QR verifikasi dan gambar tanda tangan sertifikat
 - [ ] Pelaporan, retensi otomatis, reissue, dan deployment production
 ```
