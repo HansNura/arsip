@@ -63,7 +63,7 @@ class AuthenticationTest extends TestCase
             ->get('/dashboard')
             ->assertOk()
             ->assertSee('Dashboard')
-            ->assertSee('Modul yang siap dikembangkan');
+            ->assertSee('Manajemen pelatihan');
     }
 
     public function test_user_can_logout(): void

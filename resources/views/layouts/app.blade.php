@@ -25,6 +25,18 @@
                         Dashboard
                     </a>
 
+                    <a href="{{ route('admin.participants.index') }}" class="rounded-lg px-3 py-2 text-slate-600 transition hover:bg-slate-100 hover:text-slate-900">
+                        Peserta
+                    </a>
+
+                    <a href="{{ route('admin.batches.index') }}" class="rounded-lg px-3 py-2 text-slate-600 transition hover:bg-slate-100 hover:text-slate-900">
+                        Angkatan
+                    </a>
+
+                    <a href="{{ route('admin.programs.index') }}" class="rounded-lg px-3 py-2 text-slate-600 transition hover:bg-slate-100 hover:text-slate-900">
+                        Program
+                    </a>
+
                     <a href="{{ route('profile.edit') }}" class="rounded-lg px-3 py-2 text-slate-600 transition hover:bg-slate-100 hover:text-slate-900">
                         Profil
                     </a>

@@ -73,6 +73,9 @@ composer run dev                   # server + queue + log + Vite
 | `/login` | Publik | Login staf |
 | `/dashboard` | Login | Ringkasan data |
 | `/profile` | Login | Informasi akun dan ubah kata sandi |
+| `/admin/programs` | Login | CRUD program pelatihan |
+| `/admin/batches` | Login | CRUD angkatan dan pengelolaan pendaftaran, absensi, serta nilai |
+| `/admin/participants` | Login | Pencarian peserta dengan filter NIK, nama, tahun, dan kelas |
 | `/admin/users` | Admin | Daftar, tambah, edit, aktif/nonaktif pengguna |
 
 ## Keamanan yang Sudah Aktif
@@ -128,7 +131,8 @@ Lihat `Rencana Kerja Tim Projek.xlsx` dan `docs/erd.md`.
 - [x] ARSIP-002: skema database + migrasi + model + constraint
 - [x] ARSIP-003: login/logout, RBAC admin/staf, manajemen pengguna, perubahan password, audit auth
 - [x] ARSIP-011/012 Sebagian: endpoint dan halaman verifikasi publik
-- [ ] Modul CRUD peserta, angkatan, nilai, dan sertifikat
+- [x] CRUD program dan angkatan, pendaftaran peserta, absensi per pertemuan, nilai akhir, dan pencarian multi-filter
+- [ ] CRUD peserta dan sertifikat
 - [ ] Generator nomor sertifikat, PDF, QR, dan tanda tangan digital
 - [ ] Pelaporan, retensi otomatis, reissue, dan deployment production
 ```
