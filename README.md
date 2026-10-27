@@ -52,9 +52,13 @@ php artisan test                   # menjalankan seluruh test
 composer ci                        # Pint check + seluruh test
 composer lint                      # perbaiki format kode otomatis
 php artisan route:list             # daftar route
+php artisan retention:archive-alumni # jalankan pengarsipan alumni sekali
+php artisan schedule:work           # jalankan scheduler secara lokal
 npm run dev                        # Vite dev server
 composer run dev                   # server + queue + log + Vite
 ```
+
+Scheduler menjalankan kebijakan retensi aktif setiap hari pukul 02.00. Di production, jalankan `php artisan schedule:run` setiap menit melalui cron atau Windows Task Scheduler.
 
 ## Linter & CI
 
@@ -76,6 +80,8 @@ composer run dev                   # server + queue + log + Vite
 | `/admin/programs` | Login | CRUD program pelatihan |
 | `/admin/batches` | Login | CRUD angkatan dan pengelolaan pendaftaran, absensi, serta nilai |
 | `/admin/participants` | Login | Pencarian peserta dengan filter NIK, nama, tahun, dan kelas |
+| `/admin/reports/graduation` | Login | Rekap kelulusan per program/periode, ekspor XLSX dan PDF |
+| `/admin/retention` | Admin | Kebijakan retensi alumni, arsip statis/dinamis, dan pemulihan soft-delete |
 | `/admin/users` | Admin | Daftar, tambah, edit, aktif/nonaktif pengguna |
 
 ## Keamanan yang Sudah Aktif
@@ -132,7 +138,9 @@ Lihat `Rencana Kerja Tim Projek.xlsx` dan `docs/erd.md`.
 - [x] ARSIP-003: login/logout, RBAC admin/staf, manajemen pengguna, perubahan password, audit auth
 - [x] ARSIP-011/012 Sebagian: endpoint dan halaman verifikasi publik
 - [x] CRUD program dan angkatan, pendaftaran peserta, absensi per pertemuan, nilai akhir, dan pencarian multi-filter
+- [x] Rekap kelulusan per program/periode dengan ekspor Excel/PDF
+- [x] Kebijakan retensi alumni dan scheduler pengarsipan/soft-delete
 - [ ] CRUD peserta dan sertifikat
 - [ ] Generator nomor sertifikat, PDF, QR, dan tanda tangan digital
-- [ ] Pelaporan, retensi otomatis, reissue, dan deployment production
+- [ ] Reissue dan deployment production
 ```

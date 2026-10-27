@@ -37,11 +37,14 @@
                     border-amber-200 bg-amber-50
                 @endif">
                 @if ($result === \App\Enums\VerificationResult::Valid)
-                    <p class="text-xs font-semibold uppercase tracking-wide text-emerald-700">Sertifikat valid</p>
+                    <p class="text-xs font-semibold uppercase tracking-wide text-emerald-700">Status validitas</p>
+                    <p class="mt-1 text-lg font-semibold text-emerald-800">Valid</p>
                 @elseif ($result === \App\Enums\VerificationResult::Dibatalkan)
-                    <p class="text-xs font-semibold uppercase tracking-wide text-red-700">Sertifikat tidak berlaku</p>
+                    <p class="text-xs font-semibold uppercase tracking-wide text-red-700">Status validitas</p>
+                    <p class="mt-1 text-lg font-semibold text-red-800">Dibatalkan</p>
                 @else
-                    <p class="text-xs font-semibold uppercase tracking-wide text-amber-700">Sertifikat tidak ditemukan</p>
+                    <p class="text-xs font-semibold uppercase tracking-wide text-amber-700">Status validitas</p>
+                    <p class="mt-1 text-lg font-semibold text-amber-800">Tidak Ditemukan</p>
                 @endif
 
                 @if ($certificate)
@@ -51,7 +54,7 @@
                             <dd class="mt-0.5 font-medium text-slate-900">{{ $certificate->nomor_sertifikat }}</dd>
                         </div>
                         <div>
-                            <dt class="text-slate-500">Status</dt>
+                            <dt class="text-slate-500">Status sertifikat</dt>
                             <dd class="mt-0.5 font-medium text-slate-900">{{ ucfirst($certificate->status) }}</dd>
                         </div>
                         <div>

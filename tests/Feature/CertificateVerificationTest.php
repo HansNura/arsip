@@ -17,7 +17,8 @@ class CertificateVerificationTest extends TestCase
 
         $this->get('/verify?nomor='.urlencode($certificate->nomor_sertifikat))
             ->assertOk()
-            ->assertSee('Sertifikat valid')
+            ->assertSee('Status validitas')
+            ->assertSee('Valid')
             ->assertSee($certificate->nomor_sertifikat)
             ->assertSee('Budi Santoso')
             ->assertSee('Pelatihan Kepemimpinan Dasar')
@@ -43,14 +44,14 @@ class CertificateVerificationTest extends TestCase
 
         $this->get('/verify?nomor='.urlencode($certificate->nomor_sertifikat))
             ->assertOk()
-            ->assertSee('Sertifikat tidak berlaku');
+            ->assertSee('Dibatalkan');
     }
 
     public function test_unknown_certificate_number_is_not_found(): void
     {
         $this->get('/verify?nomor=TIDAK-ADA')
             ->assertOk()
-            ->assertSee('Sertifikat tidak ditemukan');
+            ->assertSee('Tidak Ditemukan');
 
         $this->assertDatabaseHas('verification_logs', [
             'nomor_sertifikat_input' => 'TIDAK-ADA',
@@ -61,7 +62,10 @@ class CertificateVerificationTest extends TestCase
 
     public function test_form_submission_redirects_to_result(): void
     {
-        $this->post('/verify', ['nomor_sertifikat' => 'PEL/2026/9999'])
-            ->assertRedirectContains('/verify?nomor=');
+        $this->followingRedirects()
+            ->post('/verify', ['nomor_sertifikat' => 'PEL/2026/9999'])
+            ->assertOk()
+            ->assertSee('Tidak Ditemukan')
+            ->assertSee('PEL/2026/9999');
     }
 }
