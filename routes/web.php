@@ -6,7 +6,9 @@ use App\Http\Controllers\AdminUserController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\CertificateVerificationController;
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\GraduationReportController;
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\RetentionPolicyController;
 use App\Http\Controllers\TrainingController;
 use Illuminate\Support\Facades\Route;
 
@@ -64,6 +66,11 @@ Route::middleware(['auth', 'role:admin,staf_arsip'])
     ->prefix('admin')
     ->name('admin.')
     ->group(function () {
+        Route::get('/reports/graduation', [GraduationReportController::class, 'index'])->name('reports.graduation');
+        Route::get('/reports/graduation/{format}', [GraduationReportController::class, 'export'])
+            ->whereIn('format', ['xlsx', 'pdf'])
+            ->name('reports.graduation.export');
+
         Route::get('/certificates', [AdminCertificateController::class, 'index'])->name('certificates.index');
         Route::get('/certificate-template', [AdminCertificateTemplateController::class, 'edit'])->name('certificate-templates.edit');
         Route::put('/certificate-template', [AdminCertificateTemplateController::class, 'update'])->name('certificate-templates.update');
@@ -77,6 +84,15 @@ Route::middleware(['auth', 'role:admin'])
     ->prefix('admin')
     ->name('admin.')
     ->group(function () {
+        Route::get('/retention', [RetentionPolicyController::class, 'index'])->name('retention.index');
+        Route::get('/retention/create', [RetentionPolicyController::class, 'create'])->name('retention.create');
+        Route::post('/retention', [RetentionPolicyController::class, 'store'])->name('retention.store');
+        Route::get('/retention/{policy}/edit', [RetentionPolicyController::class, 'edit'])->name('retention.edit');
+        Route::put('/retention/{policy}', [RetentionPolicyController::class, 'update'])->name('retention.update');
+        Route::post('/retention/participants/{participant}/restore', [RetentionPolicyController::class, 'restoreParticipant'])
+            ->whereNumber('participant')
+            ->name('retention.participants.restore');
+
         Route::get('/users', [AdminUserController::class, 'index'])->name('users.index');
         Route::get('/users/create', [AdminUserController::class, 'create'])->name('users.create');
         Route::post('/users', [AdminUserController::class, 'store'])->name('users.store');

@@ -52,9 +52,13 @@ php artisan test                   # menjalankan seluruh test
 composer ci                        # Pint check + seluruh test
 composer lint                      # perbaiki format kode otomatis
 php artisan route:list             # daftar route
+php artisan retention:archive-alumni # jalankan pengarsipan alumni sekali
+php artisan schedule:work          # jalankan scheduler secara lokal
 npm run dev                        # Vite dev server
 composer run dev                   # server + queue + log + Vite
 ```
+
+Scheduler menjalankan `retention:archive-alumni` setiap hari pukul 02.00. Di production, jalankan `php artisan schedule:run` setiap menit melalui cron.
 
 ## Linter & CI
 
@@ -79,6 +83,8 @@ composer run dev                   # server + queue + log + Vite
 | `/admin/batches` | Login | CRUD angkatan dan pengelolaan pendaftaran, absensi, serta nilai |
 | `/admin/participants` | Login | Pencarian peserta dengan filter NIK, nama, tahun, dan kelas |
 | `/admin/certificates` | Login | Terbitkan, cari, dan unduh sertifikat peserta yang lulus |
+| `/admin/reports/graduation` | Login | Rekap kelulusan per program/periode, ekspor XLSX dan PDF |
+| `/admin/retention` | Admin | Kebijakan retensi alumni, cold storage, dan pemulihan data |
 | `/admin/users` | Admin | Daftar, tambah, edit, aktif/nonaktif pengguna |
 
 ## API Verifikasi Publik
@@ -120,6 +126,7 @@ Contoh respons:
 - PDF sertifikat disimpan di disk privat dan hanya dapat diunduh lewat route terautentikasi.
 - Tanda tangan pada PDF berupa **gambar** (bukan tanda tangan kriptografis/PKI); keaslian dijaga `file_hash` SHA-256 dan token verifikasi.
 - Log verifikasi disimpan di `verification_logs`.
+- Ekspor laporan, perubahan kebijakan retensi, dan proses pengarsipan dicatat di `audit_logs`.
 - Audit login/logout disimpan di `audit_logs`; tabel ini append-only lewat trigger SQLite.
 - Partial unique index memastikan satu sertifikat `aktif` per enrollment.
 
@@ -171,5 +178,9 @@ Lihat `Rencana Kerja Tim Projek.xlsx` dan `docs/erd.md`.
 - [ ] CRUD peserta dan sertifikat
 - [x] ARSIP-009: penerbitan sertifikat, penyimpanan PDF privat, dan unduhan terautentikasi
 - [x] ARSIP-010: QR verifikasi berbasis token dan gambar tanda tangan sertifikat
-- [ ] Pelaporan, retensi otomatis, reissue, dan deployment production
+- [x] ARSIP-014: rekap kelulusan per program/periode
+- [x] ARSIP-015: ekspor laporan XLSX dan PDF
+- [x] ARSIP-016: kebijakan retensi alumni dan scheduler pengarsipan
+- [x] ARSIP-017: penanda cold storage untuk alumni lama
+- [ ] Reissue dan deployment production
 ```

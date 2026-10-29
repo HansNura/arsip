@@ -42,6 +42,7 @@
                     ['Angkatan & Kelas', 'Buat angkatan, atur jadwal, dan kelola pesertanya.', route('admin.batches.index')],
                     ['Pencarian Peserta', 'Filter cepat berdasarkan NIK, nama, tahun, dan kelas.', route('admin.participants.index')],
                     ['Sertifikat', 'Terbitkan PDF, kelola QR verifikasi, dan gambar tanda tangan.', route('admin.certificates.index')],
+                    ['Laporan Kelulusan', 'Rekap per program/periode dan ekspor Excel/PDF.', route('admin.reports.graduation')],
                 ] as [$modul, $description, $url])
                     <li class="flex items-start justify-between gap-4 py-3">
                         <a href="{{ $url }}" class="block">
@@ -68,6 +69,11 @@
                 </a>
 
                 @if (auth()->user()->role === \App\Enums\UserRole::Admin)
+                    <a href="{{ route('admin.retention.index') }}" class="block rounded-xl border border-slate-200 p-4 transition hover:border-emerald-300 hover:bg-emerald-50/50">
+                        <p class="text-sm font-semibold text-slate-900">Retensi alumni</p>
+                        <p class="mt-1 text-sm text-slate-600">Atur kebijakan arsip, cold storage, dan pemulihan data.</p>
+                    </a>
+
                     <a href="{{ route('admin.users.index') }}" class="block rounded-xl border border-slate-200 p-4 transition hover:border-emerald-300 hover:bg-emerald-50/50">
                         <p class="text-sm font-semibold text-slate-900">Manajemen pengguna</p>
                         <p class="mt-1 text-sm text-slate-600">Lihat akun admin dan staf arsip.</p>
