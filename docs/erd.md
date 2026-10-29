@@ -708,6 +708,8 @@ WHERE p.deleted_at IS NULL;
 
 QR code pada PDF mengarah ke `/verify/s/{qr_token}`. Token dicari pada `certificates.qr_token`, lalu hasilnya dibaca dari `v_public_certificate`; setiap permintaan tetap dicatat pada `verification_logs`.
 
+API publik `GET /api/verify?nomor=...` mengembalikan JSON `{hasil, sertifikat}` dengan kolom aman yang sama, mencatat `verification_logs`, dan dibatasi 20 permintaan per menit per IP.
+
 Setiap pemanggilan `/verify` menulis `verification_logs`; rate limiting dihitung dari `(ip_address, created_at)` pada 1 menit terakhir.
 
 ### 7.3 Penerbitan ulang (FR-06)
@@ -788,6 +790,7 @@ PRAGMA synchronous = NORMAL;   -- aman dengan WAL untuk sebagian besar kasus
 - PDF sertifikat dirender dari `resources/views/certificates/pdf.blade.php` memakai dompdf, disimpan di disk privat (`storage/app/private/certificates/{tahun}/`), dan `file_hash` dihitung dari isi PDF final. Unduhan hanya tersedia lewat route terautentikasi.
 - Penerbitan massal memproses per enrollment dalam transaksi terpisah agar tidak menahan kunci tulis SQLite terlalu lama; kegagalan satu peserta tidak membatalkan yang lain dan dicatat pada ringkasan hasil.
 - Tanda tangan sertifikat bersifat visual: gambar PNG/JPG dari `certificate_templates.tanda_tangan_path` (fallback ke konfigurasi `certificate.signature_path`). Tidak ada tanda tangan kriptografis/PKI; keaslian dijaga `file_hash` SHA-256 dan `qr_token` acak yang mengarah ke halaman verifikasi.
+- Verifikasi web (nomor/QR) dan API berbagi `App\Services\VerificationLogger`; API didaftarkan di `routes/api.php` dengan throttle 20 permintaan/menit.
 
 ## 10. Asumsi & Pertanyaan Terbuka
 

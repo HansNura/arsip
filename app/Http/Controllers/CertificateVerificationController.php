@@ -4,7 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Enums\CertificateStatus;
 use App\Enums\VerificationResult;
-use App\Models\VerificationLog;
+use App\Services\VerificationLogger;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -13,6 +13,8 @@ use Illuminate\View\View;
 
 class CertificateVerificationController extends Controller
 {
+    public function __construct(private VerificationLogger $logger) {}
+
     public function index(Request $request): View
     {
         $nomor = $request->query('nomor');
@@ -46,7 +48,7 @@ class CertificateVerificationController extends Controller
         $result = $this->resultFor($certificate);
         $nomor = $certificate?->nomor_sertifikat ?? '';
 
-        $this->logVerification(
+        $this->logger->log(
             $nomor !== '' ? $nomor : Str::limit($token, 120, ''),
             $certificate?->certificate_id,
             $result,
@@ -68,7 +70,7 @@ class CertificateVerificationController extends Controller
 
         $result = $this->resultFor($certificate);
 
-        $this->logVerification($nomor, $certificate?->certificate_id, $result);
+        $this->logger->log($nomor, $certificate?->certificate_id, $result);
 
         return view('verify.index', [
             'certificate' => $certificate,
@@ -84,17 +86,5 @@ class CertificateVerificationController extends Controller
             $certificate->status === CertificateStatus::Aktif->value => VerificationResult::Valid,
             default => VerificationResult::Dibatalkan,
         };
-    }
-
-    private function logVerification(string $input, ?int $certificateId, VerificationResult $result): void
-    {
-        VerificationLog::create([
-            'nomor_sertifikat_input' => Str::limit($input, 120, ''),
-            'certificate_id' => $certificateId,
-            'hasil' => $result,
-            'ip_address' => request()->ip() ?? 'unknown',
-            'user_agent' => Str::limit((string) request()->userAgent(), 1000, ''),
-            'created_at' => now(),
-        ]);
     }
 }

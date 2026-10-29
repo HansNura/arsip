@@ -71,6 +71,7 @@ composer run dev                   # server + queue + log + Vite
 | `/` | Publik | Landing page |
 | `/verify` | Publik | Verifikasi nomor sertifikat |
 | `/verify/s/{token}` | Publik | Verifikasi lewat QR code (token acak) |
+| `/api/verify?nomor=...` | Publik | API JSON verifikasi sertifikat |
 | `/login` | Publik | Login staf |
 | `/dashboard` | Login | Ringkasan data |
 | `/profile` | Login | Informasi akun dan ubah kata sandi |
@@ -80,9 +81,36 @@ composer run dev                   # server + queue + log + Vite
 | `/admin/certificates` | Login | Terbitkan, cari, dan unduh sertifikat peserta yang lulus |
 | `/admin/users` | Admin | Daftar, tambah, edit, aktif/nonaktif pengguna |
 
+## API Verifikasi Publik
+
+Endpoint JSON untuk integrasi eksternal, tanpa login:
+
+```bash
+curl "http://localhost:8000/api/verify?nomor=PEL%2F2026%2F0001"
+```
+
+Contoh respons:
+
+```json
+{
+  "hasil": "valid",
+  "sertifikat": {
+    "nomor_sertifikat": "PEL/2026/0001",
+    "status": "aktif",
+    "nama": "Budi Santoso",
+    "program": "Pelatihan Kepemimpinan Dasar",
+    "kode_batch": "2026-01",
+    "tahun": 2026,
+    "tanggal_terbit": "2026-02-10"
+  }
+}
+```
+
+`hasil` bernilai `valid`, `dibatalkan`, atau `tidak_ditemukan`. Saat tidak ditemukan, `sertifikat` bernilai `null`. Endpoint dibatasi 20 permintaan per menit per IP dan hanya mengembalikan kolom aman.
+
 ## Keamanan yang Sudah Aktif
 
-- Login dibatasi 5 percobaan per menit; verifikasi publik dibatasi 20 permintaan per menit.
+- Login dibatasi 5 percobaan per menit; submit verifikasi dan API dibatasi 20 permintaan per menit; halaman verifikasi dan QR dibatasi 60 permintaan per menit.
 - Akun nonaktif tidak dapat login, dan sesi yang sedang berjalan langsung diputus pada request berikutnya.
 - Password di-hash dengan cast `hashed` Laravel; perubahan password memverifikasi password saat ini.
 - RBAC melalui middleware `role`; admin tidak dapat menonaktifkan atau menurunkan peran akun sendiri.
@@ -135,7 +163,9 @@ Lihat `Rencana Kerja Tim Projek.xlsx` dan `docs/erd.md`.
 - [x] ARSIP-001: scaffold Laravel, konfigurasi environment, health check, asset pipeline, CI/linter
 - [x] ARSIP-002: skema database + migrasi + model + constraint
 - [x] ARSIP-003: login/logout, RBAC admin/staf, manajemen pengguna, perubahan password, audit auth
-- [x] ARSIP-011/012 Sebagian: endpoint dan halaman verifikasi publik
+- [x] ARSIP-011: endpoint API publik verifikasi sertifikat (JSON)
+- [x] ARSIP-012: halaman publik verifikasi nomor dan QR
+- [x] ARSIP-013: rate limiting verifikasi publik
 - [x] CRUD program dan angkatan, pendaftaran peserta, absensi per pertemuan, nilai akhir, dan pencarian multi-filter
 - [x] ARSIP-008: generator nomor sertifikat unik per program dan tahun
 - [ ] CRUD peserta dan sertifikat
