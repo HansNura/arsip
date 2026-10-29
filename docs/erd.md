@@ -735,6 +735,8 @@ Setiap pemanggilan `/verify` menulis `verification_logs`; rate limiting dihitung
 3. Aksi `arsipkan` mengisi `archived_at`; `cold_storage` juga mengubah `participants.storage_tier = 'cold'`; `hapus_lembut` mengisi `deleted_at`.
 4. Sertifikat dan audit log tidak dihapus permanen (kewajiban legalitas).
 
+Implementasi: scheduler harian `retention:archive-alumni` (02.00) membaca kebijakan aktif, menghitung batas umur dari `batches.tanggal_selesai`, lalu menjalankan aksi `arsipkan` (isi `archived_at`), `cold_storage` (`archived_at` + `storage_tier = cold`), atau `hapus_lembut` (soft delete). Setiap eksekusi kebijakan dicatat ke `audit_logs` dengan aksi `RETENTION_ARCHIVE`.
+
 ### 7.6 Import data lama (ARSIP-007)
 
 1. Buat `data_imports` berstatus `proses`.
@@ -791,6 +793,8 @@ PRAGMA synchronous = NORMAL;   -- aman dengan WAL untuk sebagian besar kasus
 - Penerbitan massal memproses per enrollment dalam transaksi terpisah agar tidak menahan kunci tulis SQLite terlalu lama; kegagalan satu peserta tidak membatalkan yang lain dan dicatat pada ringkasan hasil.
 - Tanda tangan sertifikat bersifat visual: gambar PNG/JPG dari `certificate_templates.tanda_tangan_path` (fallback ke konfigurasi `certificate.signature_path`). Tidak ada tanda tangan kriptografis/PKI; keaslian dijaga `file_hash` SHA-256 dan `qr_token` acak yang mengarah ke halaman verifikasi.
 - Verifikasi web (nomor/QR) dan API berbagi `App\Services\VerificationLogger`; API didaftarkan di `routes/api.php` dengan throttle 20 permintaan/menit.
+- Rekap kelulusan (`GraduationReportController`) membaca `enrollments`, `batches`, dan `programs`, lalu mengekspor XLSX (`maatwebsite/excel`) atau PDF (`dompdf`). Ekspor dicatat ke `audit_logs` dengan aksi `EXPORT`.
+- Kebijakan retensi dikelola `RetentionPolicyController` (admin) dan dijalankan `App\Console\Commands\ArchiveAlumni`; perubahan kebijakan dan pemulihan peserta dicatat ke `audit_logs`.
 
 ## 10. Asumsi & Pertanyaan Terbuka
 

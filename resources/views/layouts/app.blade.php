@@ -41,11 +41,19 @@
                         Sertifikat
                     </a>
 
+                    <a href="{{ route('admin.reports.graduation') }}" class="rounded-lg px-3 py-2 text-slate-600 transition hover:bg-slate-100 hover:text-slate-900">
+                        Laporan
+                    </a>
+
                     <a href="{{ route('profile.edit') }}" class="rounded-lg px-3 py-2 text-slate-600 transition hover:bg-slate-100 hover:text-slate-900">
                         Profil
                     </a>
 
                     @if (auth()->user()->role === \App\Enums\UserRole::Admin)
+                        <a href="{{ route('admin.retention.index') }}" class="rounded-lg px-3 py-2 text-slate-600 transition hover:bg-slate-100 hover:text-slate-900">
+                            Retensi
+                        </a>
+
                         <a href="{{ route('admin.users.index') }}" class="rounded-lg px-3 py-2 text-slate-600 transition hover:bg-slate-100 hover:text-slate-900">
                             Pengguna
                         </a>
