@@ -25,6 +25,7 @@ class CertificateVerificationApiTest extends TestCase
             ->assertJsonPath('sertifikat.program', 'Pelatihan Kepemimpinan Dasar')
             ->assertJsonPath('sertifikat.kode_batch', '2026-01')
             ->assertJsonPath('sertifikat.tahun', 2026)
+            ->assertJsonPath('sertifikat.tanggal_terbit', '2026-02-10')
             ->assertJsonStructure([
                 'hasil',
                 'sertifikat' => [
