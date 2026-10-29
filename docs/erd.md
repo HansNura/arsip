@@ -495,6 +495,7 @@ Permohonan dan riwayat penerbitan ulang sertifikat duplikat (FR-06).
 | original_certificate_id | INTEGER | NOT NULL, FK → certificates.id, ON DELETE RESTRICT | Sertifikat asal |
 | new_certificate_id | INTEGER | NULL UNIQUE, FK → certificates.id, ON DELETE SET NULL | Sertifikat pengganti |
 | alasan | TEXT | NOT NULL, CHECK `length(trim(alasan)) > 0` | Alasan reissue |
+| catatan_keputusan | TEXT | NULL | Catatan persetujuan/penolakan admin |
 | pemohon_nama | TEXT | NULL | Nama pemohon |
 | pemohon_kontak | TEXT | NULL | Kontak pemohon |
 | status | TEXT | NOT NULL DEFAULT `diajukan`, CHECK in (`diajukan`, `disetujui`, `ditolak`, `selesai`) | Alur permohonan |
@@ -714,10 +715,11 @@ Setiap pemanggilan `/verify` menulis `verification_logs`; rate limiting dihitung
 
 ### 7.3 Penerbitan ulang (FR-06)
 
-1. Buat baris `certificate_reissues` berstatus `diajukan` dengan alasan wajib.
-2. Setelah disetujui, dalam satu transaksi: set sertifikat lama `status = 'diganti'`, terbitkan sertifikat baru `status = 'aktif'`, isi `new_certificate_id` dan `replaced_by_id`.
-3. Urutan update penting karena partial unique index: sertifikat lama harus tidak aktif sebelum sertifikat baru di-insert.
-4. Seluruh langkah dicatat ke `audit_logs` (`REISSUE`).
+1. Staf membuat baris `certificate_reissues` berstatus `diajukan` dengan alasan wajib. Hanya sertifikat `aktif` yang boleh diajukan dan tidak boleh ada permohonan terbuka lain untuk sertifikat yang sama.
+2. Admin menyetujui atau menolak. Penyetuju wajib berbeda dari staf pembuat permohonan (pemisahan tugas), dan catatan keputusan disimpan di `catatan_keputusan`.
+3. Setelah disetujui, staf memproses dalam satu transaksi: set sertifikat lama `status = 'diganti'`, terbitkan sertifikat baru `status = 'aktif'` (nomor, PDF, dan hash baru), lalu isi `new_certificate_id` dan `replaced_by_id`, serta status `selesai`.
+4. Urutan update penting karena partial unique index: sertifikat lama harus tidak aktif sebelum sertifikat baru di-insert.
+5. Audit dicatat pada `audit_logs`: `CREATE_REISSUE`, `APPROVE_REISSUE`, `REJECT_REISSUE`, `REISSUE`, dan `REPLACE_CERTIFICATE`.
 
 ### 7.4 Nilai & kelulusan (FR-01, FR-05)
 
@@ -795,6 +797,7 @@ PRAGMA synchronous = NORMAL;   -- aman dengan WAL untuk sebagian besar kasus
 - Verifikasi web (nomor/QR) dan API berbagi `App\Services\VerificationLogger`; API didaftarkan di `routes/api.php` dengan throttle 20 permintaan/menit.
 - Rekap kelulusan (`GraduationReportController`) membaca `enrollments`, `batches`, dan `programs`, lalu mengekspor XLSX (`maatwebsite/excel`) atau PDF (`dompdf`). Ekspor dicatat ke `audit_logs` dengan aksi `EXPORT`.
 - Kebijakan retensi dikelola `RetentionPolicyController` (admin) dan dijalankan `App\Console\Commands\ArchiveAlumni`; perubahan kebijakan dan pemulihan peserta dicatat ke `audit_logs`.
+- Reissue dikelola `CertificateReissueService`: staf mengajukan/memproses, admin menyetujui/menolak dengan pemisahan tugas, dan penerbitan pengganti memakai `CertificateIssuer` di dalam transaksi. Seluruh transisi dicatat ke `audit_logs`.
 
 ## 10. Asumsi & Pertanyaan Terbuka
 

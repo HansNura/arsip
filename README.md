@@ -83,6 +83,7 @@ Scheduler menjalankan `retention:archive-alumni` setiap hari pukul 02.00. Di pro
 | `/admin/batches` | Login | CRUD angkatan dan pengelolaan pendaftaran, absensi, serta nilai |
 | `/admin/participants` | Login | Pencarian peserta dengan filter NIK, nama, tahun, dan kelas |
 | `/admin/certificates` | Login | Terbitkan, cari, dan unduh sertifikat peserta yang lulus |
+| `/admin/reissues` | Login | Ajukan dan proses penerbitan ulang; approval hanya admin |
 | `/admin/reports/graduation` | Login | Rekap kelulusan per program/periode, ekspor XLSX dan PDF |
 | `/admin/retention` | Admin | Kebijakan retensi alumni, cold storage, dan pemulihan data |
 | `/admin/users` | Admin | Daftar, tambah, edit, aktif/nonaktif pengguna |
@@ -127,6 +128,7 @@ Contoh respons:
 - Tanda tangan pada PDF berupa **gambar** (bukan tanda tangan kriptografis/PKI); keaslian dijaga `file_hash` SHA-256 dan token verifikasi.
 - Log verifikasi disimpan di `verification_logs`.
 - Ekspor laporan, perubahan kebijakan retensi, dan proses pengarsipan dicatat di `audit_logs`.
+- Reissue memakai pemisahan tugas: staf mengajukan/memproses, admin menyetujui/menolak, dan penyetuju tidak boleh sama dengan pengaju. Semua transisi dicatat di `audit_logs`.
 - Audit login/logout disimpan di `audit_logs`; tabel ini append-only lewat trigger SQLite.
 - Partial unique index memastikan satu sertifikat `aktif` per enrollment.
 
@@ -182,5 +184,8 @@ Lihat `Rencana Kerja Tim Projek.xlsx` dan `docs/erd.md`.
 - [x] ARSIP-015: ekspor laporan XLSX dan PDF
 - [x] ARSIP-016: kebijakan retensi alumni dan scheduler pengarsipan
 - [x] ARSIP-017: penanda cold storage untuk alumni lama
-- [ ] Reissue dan deployment production
+- [x] ARSIP-018: permohonan dan penerbitan ulang sertifikat
+- [x] ARSIP-019: audit trail permohonan, keputusan, dan penerbitan ulang
+- [ ] ARSIP-020: UAT dan hardening keamanan
+- [ ] ARSIP-021: deployment production, SSL, dan backup otomatis
 ```

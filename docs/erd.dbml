@@ -252,6 +252,7 @@ Table certificate_reissues {
   original_certificate_id integer [not null, ref: > certificates.id]
   new_certificate_id integer [unique, ref: > certificates.id]
   alasan text [not null, note: 'CHECK length(trim(alasan)) > 0']
+  catatan_keputusan text
   pemohon_nama text
   pemohon_kontak text
   status text [not null, default: 'diajukan', note: 'diajukan | disetujui | ditolak | selesai']

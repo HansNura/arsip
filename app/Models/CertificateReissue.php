@@ -12,6 +12,7 @@ class CertificateReissue extends Model
         'original_certificate_id',
         'new_certificate_id',
         'alasan',
+        'catatan_keputusan',
         'pemohon_nama',
         'pemohon_kontak',
         'status',

@@ -43,6 +43,7 @@
                     ['Pencarian Peserta', 'Filter cepat berdasarkan NIK, nama, tahun, dan kelas.', route('admin.participants.index')],
                     ['Sertifikat', 'Terbitkan PDF, kelola QR verifikasi, dan gambar tanda tangan.', route('admin.certificates.index')],
                     ['Laporan Kelulusan', 'Rekap per program/periode dan ekspor Excel/PDF.', route('admin.reports.graduation')],
+                    ['Penerbitan Ulang', 'Ajukan, setujui, dan terbitkan sertifikat pengganti.', route('admin.reissues.index')],
                 ] as [$modul, $description, $url])
                     <li class="flex items-start justify-between gap-4 py-3">
                         <a href="{{ $url }}" class="block">

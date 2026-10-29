@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\AdminCertificateController;
+use App\Http\Controllers\AdminCertificateReissueController;
 use App\Http\Controllers\AdminCertificateTemplateController;
 use App\Http\Controllers\AdminUserController;
 use App\Http\Controllers\AuthController;
@@ -71,6 +72,12 @@ Route::middleware(['auth', 'role:admin,staf_arsip'])
             ->whereIn('format', ['xlsx', 'pdf'])
             ->name('reports.graduation.export');
 
+        Route::get('/reissues', [AdminCertificateReissueController::class, 'index'])->name('reissues.index');
+        Route::get('/reissues/create', [AdminCertificateReissueController::class, 'create'])->name('reissues.create');
+        Route::post('/reissues', [AdminCertificateReissueController::class, 'store'])->name('reissues.store');
+        Route::get('/reissues/{reissue}', [AdminCertificateReissueController::class, 'show'])->name('reissues.show');
+        Route::post('/reissues/{reissue}/process', [AdminCertificateReissueController::class, 'process'])->name('reissues.process');
+
         Route::get('/certificates', [AdminCertificateController::class, 'index'])->name('certificates.index');
         Route::get('/certificate-template', [AdminCertificateTemplateController::class, 'edit'])->name('certificate-templates.edit');
         Route::put('/certificate-template', [AdminCertificateTemplateController::class, 'update'])->name('certificate-templates.update');
@@ -92,6 +99,9 @@ Route::middleware(['auth', 'role:admin'])
         Route::post('/retention/participants/{participant}/restore', [RetentionPolicyController::class, 'restoreParticipant'])
             ->whereNumber('participant')
             ->name('retention.participants.restore');
+
+        Route::post('/reissues/{reissue}/approve', [AdminCertificateReissueController::class, 'approve'])->name('reissues.approve');
+        Route::post('/reissues/{reissue}/reject', [AdminCertificateReissueController::class, 'reject'])->name('reissues.reject');
 
         Route::get('/users', [AdminUserController::class, 'index'])->name('users.index');
         Route::get('/users/create', [AdminUserController::class, 'create'])->name('users.create');
