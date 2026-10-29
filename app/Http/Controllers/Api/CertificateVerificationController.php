@@ -8,6 +8,7 @@ use App\Http\Controllers\Controller;
 use App\Services\VerificationLogger;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
 
 class CertificateVerificationController extends Controller
@@ -42,7 +43,9 @@ class CertificateVerificationController extends Controller
                 'program' => $certificate->program,
                 'kode_batch' => $certificate->kode_batch,
                 'tahun' => (int) $certificate->tahun,
-                'tanggal_terbit' => $certificate->tanggal_terbit,
+                'tanggal_terbit' => $certificate->tanggal_terbit
+                    ? Carbon::parse($certificate->tanggal_terbit)->toDateString()
+                    : null,
             ],
         ]);
     }
