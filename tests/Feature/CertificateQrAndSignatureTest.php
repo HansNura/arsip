@@ -46,7 +46,7 @@ class CertificateQrAndSignatureTest extends TestCase
 
         $this->get(route('verify.token', ['token' => $certificate->qr_token]))
             ->assertOk()
-            ->assertSee('Sertifikat valid')
+            ->assertSee('Valid')
             ->assertSee($certificate->nomor_sertifikat)
             ->assertSee('Budi Santoso')
             ->assertSee('Pelatihan Kepemimpinan Dasar')
@@ -68,6 +68,7 @@ class CertificateQrAndSignatureTest extends TestCase
 
         $this->get(route('verify.token', ['token' => $token]))
             ->assertOk()
+            ->assertSee('Tidak Ditemukan')
             ->assertSee('Tautan verifikasi tidak dikenali')
             ->assertDontSee($token);
 
@@ -89,7 +90,7 @@ class CertificateQrAndSignatureTest extends TestCase
 
         $this->get(route('verify.token', ['token' => $certificate->qr_token]))
             ->assertOk()
-            ->assertSee('Sertifikat tidak berlaku');
+            ->assertSee('Dibatalkan');
     }
 
     public function test_qr_code_service_returns_png_data_uri(): void
