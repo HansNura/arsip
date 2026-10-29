@@ -8,6 +8,7 @@ use App\Enums\EnrollmentStatus;
 use App\Enums\GraduationStatus;
 use App\Models\Batch;
 use App\Models\Certificate;
+use App\Models\CertificateNumberSequence;
 use App\Models\CertificateTemplate;
 use App\Models\Enrollment;
 use App\Models\Participant;
@@ -56,6 +57,13 @@ trait BuildsCertificateData
             'versi' => 1,
             'file_path' => 'templates/default.pdf',
             'is_active' => true,
+        ]);
+
+        CertificateNumberSequence::create([
+            'program_id' => $program->id,
+            'tahun' => 2026,
+            'prefix' => 'PEL',
+            'last_number' => 1,
         ]);
 
         return Certificate::create(array_merge([
