@@ -64,7 +64,7 @@ Scheduler menjalankan `retention:archive-alumni` setiap hari pukul 02.00. Di pro
 
 - **Laravel Pint** dipakai sebagai linter/formatter PHP.
 - **GitHub Actions** ada di `.github/workflows/ci.yml`:
-  - Job `quality`: install Composer, `pint --test`, lalu `php artisan test`.
+  - Job `quality`: install Composer, `composer audit --locked --no-dev`, `pint --test`, lalu `php artisan test`.
   - Job `frontend`: `npm ci --include=dev` dan `npm run build`.
 - Jalankan `composer ci` sebelum push agar pipeline lokal dan GitHub konsisten.
 
@@ -129,6 +129,8 @@ Contoh respons:
 - Log verifikasi disimpan di `verification_logs`.
 - Ekspor laporan, perubahan kebijakan retensi, dan proses pengarsipan dicatat di `audit_logs`.
 - Reissue memakai pemisahan tugas: staf mengajukan/memproses, admin menyetujui/menolak, dan penyetuju tidak boleh sama dengan pengaju. Semua transisi dicatat di `audit_logs`.
+- Security headers aktif di semua respons: `X-Content-Type-Options`, `X-Frame-Options`, `Referrer-Policy`, `Permissions-Policy`, dan `X-Permitted-Cross-Domain-Policies`; HSTS dikirim untuk request HTTPS.
+- Checklist UAT dan keamanan tersedia di `docs/uat.md`.
 - Audit login/logout disimpan di `audit_logs`; tabel ini append-only lewat trigger SQLite.
 - Partial unique index memastikan satu sertifikat `aktif` per enrollment.
 
@@ -148,8 +150,9 @@ docs/
   erd.md                 ERD, kamus data, aturan bisnis
   erd.dbml               ERD untuk dbdiagram.io
   laporan-adpl.md        Draft laporan ADPL sesuai format kampus
+  uat.md                 Skenario UAT dan checklist keamanan
 resources/views/         Blade: layout, home, auth, dashboard, verify, admin
-tests/                   Auth, RBAC, verifikasi, constraint database
+tests/                   Auth, RBAC, verifikasi, reissue, laporan, retensi, constraint database
 ```
 
 ## Catatan SQLite
@@ -186,6 +189,6 @@ Lihat `Rencana Kerja Tim Projek.xlsx` dan `docs/erd.md`.
 - [x] ARSIP-017: penanda cold storage untuk alumni lama
 - [x] ARSIP-018: permohonan dan penerbitan ulang sertifikat
 - [x] ARSIP-019: audit trail permohonan, keputusan, dan penerbitan ulang
-- [ ] ARSIP-020: UAT dan hardening keamanan
+- [x] ARSIP-020: UAT dan hardening keamanan
 - [ ] ARSIP-021: deployment production, SSL, dan backup otomatis
 ```
