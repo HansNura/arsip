@@ -32,7 +32,7 @@ Buka `http://localhost:8000`.
 
 ### Akun Demo
 
-Dibuat oleh `UserSeeder`:
+Dibuat oleh `UserSeeder` hanya di lingkungan `local`/`testing`:
 
 | Peran | Email | Kata sandi |
 | --- | --- | --- |
@@ -42,7 +42,13 @@ Dibuat oleh `UserSeeder`:
 Di lingkungan `local`, `DemoDataSeeder` juga membuat satu sertifikat contoh:
 `PEL/2026/0001` (Budi Santoso).
 
-Ubah kata sandi akun demo sebelum dipakai di lingkungan nyata.
+Seeder demo **tidak berjalan di production**. Buat admin pertama dengan:
+
+```bash
+php artisan user:create-admin --name="Nama Admin" --email="admin@domain.go.id" --password="kata-sandi-panjang"
+```
+
+Kata sandi minimal 12 karakter. Segera ganti kata sandi akun demo bila database lokal dipakai bersama.
 
 ### Perintah Berguna
 
@@ -53,6 +59,7 @@ composer ci                        # Pint check + seluruh test
 composer lint                      # perbaiki format kode otomatis
 php artisan route:list             # daftar route
 php artisan retention:archive-alumni # jalankan pengarsipan alumni sekali
+php artisan user:create-admin      # buat admin pertama di production
 php artisan schedule:work          # jalankan scheduler secara lokal
 npm run dev                        # Vite dev server
 composer run dev                   # server + queue + log + Vite

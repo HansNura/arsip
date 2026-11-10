@@ -98,6 +98,10 @@ Tandai `[x]` bila hasil sesuai.
 - [ ] HSTS aktif saat request HTTPS.
 - [ ] `audit_logs` append-only (update/delete ditolak trigger).
 - [ ] `composer audit --locked --no-dev` bersih.
+- [ ] `APP_ENV=production`, `APP_DEBUG=false`, dan `APP_URL` memakai HTTPS.
+- [ ] `SESSION_SECURE_COOKIE=true` dan cookie `HttpOnly` + `SameSite=Lax`.
+- [ ] Seeder demo tidak dijalankan di production; admin dibuat lewat `php artisan user:create-admin`.
+- [ ] Trusted proxies dikonfigurasi bila aplikasi berada di belakang reverse proxy agar HSTS/HTTPS terdeteksi benar.
 - [ ] Pemisahan tugas reissue berjalan (pengaju ≠ penyetuju).
 - [ ] Tidak ada pesan error/stack trace yang menampilkan data sensitif di production (`APP_DEBUG=false`).
 

@@ -22,6 +22,12 @@ class DemoDataSeeder extends Seeder
 {
     public function run(): void
     {
+        if (! app()->environment('local')) {
+            $this->command?->warn('DemoDataSeeder dilewati: data demo hanya untuk local.');
+
+            return;
+        }
+
         $program = Program::updateOrCreate(
             ['kode_program' => 'PEL'],
             [
