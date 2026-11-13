@@ -1,88 +1,110 @@
-@extends('layouts.app')
+@extends('layouts.backoffice')
 
 @section('title', 'Detail Penerbitan Ulang')
 
 @section('content')
     @php
-        $badge = match ($reissue->status) {
-            \App\Enums\ReissueStatus::Diajukan => 'bg-amber-100 text-amber-800',
-            \App\Enums\ReissueStatus::Disetujui => 'bg-sky-100 text-sky-800',
-            \App\Enums\ReissueStatus::Ditolak => 'bg-red-100 text-red-800',
-            \App\Enums\ReissueStatus::Selesai => 'bg-emerald-100 text-emerald-800',
-        };
         $isAdmin = auth()->user()->role === \App\Enums\UserRole::Admin;
+        $badge = match ($reissue->status) {
+            \App\Enums\ReissueStatus::Diajukan => 'badge-pending',
+            \App\Enums\ReissueStatus::Disetujui => 'badge-info',
+            \App\Enums\ReissueStatus::Ditolak => 'badge-cancelled',
+            \App\Enums\ReissueStatus::Selesai => 'badge-valid',
+        };
+        $stepStates = match ($reissue->status) {
+            \App\Enums\ReissueStatus::Diajukan => ['current', 'upcoming', 'upcoming'],
+            \App\Enums\ReissueStatus::Disetujui => ['done', 'current', 'upcoming'],
+            \App\Enums\ReissueStatus::Selesai => ['done', 'done', 'done'],
+            \App\Enums\ReissueStatus::Ditolak => ['done', 'rejected', 'upcoming'],
+        };
+        $steps = ['Diajukan', 'Disetujui', 'Selesai'];
     @endphp
 
-    <div class="flex flex-wrap items-end justify-between gap-4">
-        <div>
-            <p class="text-sm text-slate-500">Permohonan reissue</p>
-            <h1 class="mt-1 text-3xl font-semibold tracking-tight text-slate-900">{{ $reissue->originalCertificate?->nomor_sertifikat }}</h1>
-            <span class="mt-2 inline-block rounded-full px-2.5 py-1 text-xs font-medium {{ $badge }}">{{ ucfirst($reissue->status->value) }}</span>
-        </div>
-        <a href="{{ route('admin.reissues.index') }}" class="rounded-xl border border-slate-300 px-4 py-2.5 text-sm font-semibold text-slate-700 transition hover:border-slate-400 hover:bg-slate-50">
-            Kembali
-        </a>
-    </div>
+    <x-page-header eyebrow="Permohonan reissue" :title="$reissue->originalCertificate?->nomor_sertifikat ?? 'Detail reissue'"
+                  subtitle="Riwayat keputusan dan penerbitan sertifikat pengganti.">
+        <span class="badge {{ $badge }}">{{ ucfirst($reissue->status->value) }}</span>
+        <a href="{{ route('admin.reissues.index') }}" class="btn btn-secondary btn-sm">Kembali</a>
+    </x-page-header>
 
     @if ($errors->any())
-        <div class="mt-6 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
-            {{ $errors->first() }}
-        </div>
+        <div class="alert alert-danger mt-6">{{ $errors->first() }}</div>
     @endif
 
-    <div class="mt-6 grid gap-6 lg:grid-cols-[1.3fr_0.7fr]">
-        <section class="rounded-2xl border border-slate-200 bg-white p-5 sm:p-6">
-            <h2 class="text-sm font-semibold uppercase tracking-wide text-slate-500">Informasi permohonan</h2>
+    <ol class="card mt-6 grid gap-4 p-5 sm:grid-cols-3 sm:p-6">
+        @foreach ($steps as $index => $label)
+            @php
+                $state = $stepStates[$index];
+                $circle = match ($state) {
+                    'done' => 'bg-forest text-white border-forest',
+                    'current' => 'bg-forest/5 text-forest border-forest/30',
+                    'rejected' => 'bg-clay text-white border-clay',
+                    default => 'bg-white text-ink/30 border-ink/15',
+                };
+                $line = match ($state) {
+                    'done' => 'bg-forest/30',
+                    'rejected' => 'bg-clay/30',
+                    default => 'bg-ink/10',
+                };
+                $labelClass = match ($state) {
+                    'done', 'current' => 'text-ink',
+                    'rejected' => 'text-clay',
+                    default => 'text-ink/35',
+                };
+            @endphp
+            <li>
+                <div class="flex items-center gap-3">
+                    <span class="grid size-9 shrink-0 place-items-center rounded-full border text-xs font-bold {{ $circle }}">
+                        @if ($state === 'done')
+                            <x-icon name="check" class="size-4" />
+                        @elseif ($state === 'rejected')
+                            <x-icon name="warning" class="size-4" />
+                        @else
+                            {{ $index + 1 }}
+                        @endif
+                    </span>
+                    @if ($index < 2)
+                        <span class="hidden h-px flex-1 sm:block {{ $line }}"></span>
+                    @endif
+                </div>
+                <p class="mt-2 text-sm font-semibold {{ $labelClass }}">{{ $label }}</p>
+            </li>
+        @endforeach
+    </ol>
 
-            <dl class="mt-4 grid gap-4 text-sm sm:grid-cols-2">
+    <div class="mt-6 grid gap-6 lg:grid-cols-[1.3fr_0.7fr]">
+        <section class="card">
+            <div class="card-header">
                 <div>
-                    <dt class="text-slate-500">Sertifikat asal</dt>
-                    <dd class="mt-0.5 font-medium text-slate-900">{{ $reissue->originalCertificate?->nomor_sertifikat ?? '—' }}</dd>
+                    <h2 class="section-title">Informasi permohonan</h2>
+                    <p class="section-subtitle">Detail permohonan dan jejak keputusan.</p>
                 </div>
-                <div>
-                    <dt class="text-slate-500">Status sertifikat asal</dt>
-                    <dd class="mt-0.5 font-medium text-slate-900">{{ $reissue->originalCertificate?->status?->value ?? '—' }}</dd>
-                </div>
-                <div>
-                    <dt class="text-slate-500">Peserta</dt>
-                    <dd class="mt-0.5 font-medium text-slate-900">{{ $reissue->originalCertificate?->enrollment?->participant?->nama_lengkap ?? '—' }}</dd>
-                </div>
-                <div>
-                    <dt class="text-slate-500">Program</dt>
-                    <dd class="mt-0.5 font-medium text-slate-900">{{ $reissue->originalCertificate?->enrollment?->batch?->program?->nama ?? '—' }}</dd>
-                </div>
-                <div>
-                    <dt class="text-slate-500">Pemohon</dt>
-                    <dd class="mt-0.5 font-medium text-slate-900">{{ $reissue->pemohon_nama ?? '—' }}</dd>
-                </div>
-                <div>
-                    <dt class="text-slate-500">Kontak pemohon</dt>
-                    <dd class="mt-0.5 font-medium text-slate-900">{{ $reissue->pemohon_kontak ?? '—' }}</dd>
-                </div>
+            </div>
+            <dl class="grid gap-x-6 gap-y-5 px-5 py-6 text-sm sm:grid-cols-2 sm:px-6">
+                @foreach ([
+                    ['Sertifikat asal', $reissue->originalCertificate?->nomor_sertifikat ?? '—'],
+                    ['Status sertifikat asal', $reissue->originalCertificate?->status?->value ?? '—'],
+                    ['Peserta', $reissue->originalCertificate?->enrollment?->participant?->nama_lengkap ?? '—'],
+                    ['Program', $reissue->originalCertificate?->enrollment?->batch?->program?->nama ?? '—'],
+                    ['Pemohon', $reissue->pemohon_nama ?? '—'],
+                    ['Kontak pemohon', $reissue->pemohon_kontak ?? '—'],
+                    ['Diajukan oleh', $reissue->diprosesOleh?->nama ?? '—'],
+                    ['Waktu pengajuan', $reissue->created_at?->format('d-m-Y H:i') ?? '—'],
+                    ['Disetujui oleh', $reissue->disetujuiOleh?->nama ?? '—'],
+                    ['Waktu keputusan', $reissue->decided_at?->format('d-m-Y H:i') ?? '—'],
+                ] as [$label, $value])
+                    <div>
+                        <dt class="text-[0.62rem] font-semibold tracking-[0.14em] text-ink/40 uppercase">{{ $label }}</dt>
+                        <dd class="mt-1 font-medium text-ink">{{ $value }}</dd>
+                    </div>
+                @endforeach
                 <div class="sm:col-span-2">
-                    <dt class="text-slate-500">Alasan</dt>
-                    <dd class="mt-0.5 whitespace-pre-line font-medium text-slate-900">{{ $reissue->alasan }}</dd>
-                </div>
-                <div>
-                    <dt class="text-slate-500">Diajukan oleh</dt>
-                    <dd class="mt-0.5 font-medium text-slate-900">{{ $reissue->diprosesOleh?->nama ?? '—' }}</dd>
-                </div>
-                <div>
-                    <dt class="text-slate-500">Waktu pengajuan</dt>
-                    <dd class="mt-0.5 font-medium text-slate-900">{{ $reissue->created_at?->format('d-m-Y H:i') ?? '—' }}</dd>
-                </div>
-                <div>
-                    <dt class="text-slate-500">Disetujui oleh</dt>
-                    <dd class="mt-0.5 font-medium text-slate-900">{{ $reissue->disetujuiOleh?->nama ?? '—' }}</dd>
-                </div>
-                <div>
-                    <dt class="text-slate-500">Waktu keputusan</dt>
-                    <dd class="mt-0.5 font-medium text-slate-900">{{ $reissue->decided_at?->format('d-m-Y H:i') ?? '—' }}</dd>
+                    <dt class="text-[0.62rem] font-semibold tracking-[0.14em] text-ink/40 uppercase">Alasan</dt>
+                    <dd class="mt-1 whitespace-pre-line font-medium text-ink">{{ $reissue->alasan }}</dd>
                 </div>
                 @if ($reissue->catatan_keputusan)
                     <div class="sm:col-span-2">
-                        <dt class="text-slate-500">Catatan keputusan</dt>
-                        <dd class="mt-0.5 whitespace-pre-line font-medium text-slate-900">{{ $reissue->catatan_keputusan }}</dd>
+                        <dt class="text-[0.62rem] font-semibold tracking-[0.14em] text-ink/40 uppercase">Catatan keputusan</dt>
+                        <dd class="mt-1 whitespace-pre-line font-medium text-ink">{{ $reissue->catatan_keputusan }}</dd>
                     </div>
                 @endif
             </dl>
@@ -90,12 +112,13 @@
 
         <section class="space-y-4">
             @if ($reissue->newCertificate)
-                <div class="rounded-2xl border border-emerald-200 bg-emerald-50 p-5">
-                    <h2 class="text-sm font-semibold uppercase tracking-wide text-emerald-700">Sertifikat pengganti</h2>
-                    <p class="mt-2 text-lg font-semibold text-emerald-900">{{ $reissue->newCertificate->nomor_sertifikat }}</p>
-                    <p class="text-sm text-emerald-800">Terbit {{ $reissue->newCertificate->tanggal_terbit?->format('d-m-Y') }}</p>
+                <div class="rounded-2xl border border-forest/20 bg-forest/[0.045] p-5">
+                    <p class="text-[0.62rem] font-semibold tracking-[0.14em] text-forest uppercase">Sertifikat pengganti</p>
+                    <p class="mt-2 font-mono text-lg font-semibold text-ink">{{ $reissue->newCertificate->nomor_sertifikat }}</p>
+                    <p class="mt-1 text-sm text-ink/55">Terbit {{ $reissue->newCertificate->tanggal_terbit?->format('d-m-Y') }}</p>
                     @if ($reissue->newCertificate->file_path)
-                        <a href="{{ route('admin.certificates.download', $reissue->newCertificate) }}" class="mt-4 inline-block rounded-lg bg-emerald-700 px-3 py-2 text-xs font-semibold text-white transition hover:bg-emerald-800">
+                        <a href="{{ route('admin.certificates.download', $reissue->newCertificate) }}" class="btn btn-primary btn-sm mt-4">
+                            <x-icon name="download" class="size-4" />
                             Unduh PDF pengganti
                         </a>
                     @endif
@@ -103,48 +126,48 @@
             @endif
 
             @if ($isAdmin && $reissue->status === \App\Enums\ReissueStatus::Diajukan)
-                <div class="rounded-2xl border border-slate-200 bg-white p-5">
-                    <h2 class="text-sm font-semibold uppercase tracking-wide text-slate-500">Keputusan admin</h2>
+                <div class="card">
+                    <div class="card-header">
+                        <div>
+                            <h2 class="section-title">Keputusan admin</h2>
+                            <p class="section-subtitle">Penyetuju harus berbeda dari pengaju.</p>
+                        </div>
+                    </div>
+                    <div class="card-body space-y-5">
+                        <form method="POST" action="{{ route('admin.reissues.approve', $reissue) }}" class="space-y-3">
+                            @csrf
+                            <label class="block">
+                                <span class="field-label">Catatan persetujuan (opsional)</span>
+                                <textarea name="catatan_keputusan" rows="2" maxlength="2000" class="field-textarea"></textarea>
+                            </label>
+                            <button type="submit" class="btn btn-primary w-full">Setujui</button>
+                        </form>
 
-                    <form method="POST" action="{{ route('admin.reissues.approve', $reissue) }}" class="mt-4 space-y-3">
-                        @csrf
-                        <label class="block text-sm font-medium">Catatan persetujuan (opsional)
-                            <textarea name="catatan_keputusan" rows="2" maxlength="2000" class="mt-1.5 w-full rounded-lg border-slate-300 text-sm"></textarea>
-                        </label>
-                        <button type="submit" class="w-full rounded-lg bg-emerald-700 px-3 py-2 text-sm font-semibold text-white transition hover:bg-emerald-800">
-                            Setujui
-                        </button>
-                    </form>
-
-                    <form method="POST" action="{{ route('admin.reissues.reject', $reissue) }}" class="mt-5 space-y-3 border-t border-slate-200 pt-5">
-                        @csrf
-                        <label class="block text-sm font-medium">Alasan penolakan
-                            <textarea name="catatan_keputusan" rows="2" required maxlength="2000" class="mt-1.5 w-full rounded-lg border-slate-300 text-sm"></textarea>
-                        </label>
-                        <button type="submit" class="w-full rounded-lg border border-red-200 px-3 py-2 text-sm font-semibold text-red-700 transition hover:bg-red-50">
-                            Tolak
-                        </button>
-                    </form>
+                        <form method="POST" action="{{ route('admin.reissues.reject', $reissue) }}" class="space-y-3 border-t border-ink/10 pt-5">
+                            @csrf
+                            <label class="block">
+                                <span class="field-label">Alasan penolakan</span>
+                                <textarea name="catatan_keputusan" rows="2" required maxlength="2000" class="field-textarea"></textarea>
+                            </label>
+                            <button type="submit" class="btn btn-danger w-full">Tolak</button>
+                        </form>
+                    </div>
                 </div>
             @endif
 
             @if ($reissue->status === \App\Enums\ReissueStatus::Disetujui)
-                <div class="rounded-2xl border border-sky-200 bg-sky-50 p-5">
-                    <h2 class="text-sm font-semibold uppercase tracking-wide text-sky-700">Terbitkan pengganti</h2>
-                    <p class="mt-2 text-sm text-sky-800">Sertifikat lama akan berstatus <strong>diganti</strong> dan sertifikat baru diterbitkan dengan nomor baru.</p>
+                <div class="rounded-2xl border border-sky-ink/20 bg-sky-ink/[0.045] p-5">
+                    <p class="text-[0.62rem] font-semibold tracking-[0.14em] text-sky-ink uppercase">Terbitkan pengganti</p>
+                    <p class="mt-2 text-sm leading-6 text-ink/60">Sertifikat lama akan berstatus <strong>diganti</strong> dan sertifikat baru diterbitkan dengan nomor baru.</p>
                     <form method="POST" action="{{ route('admin.reissues.process', $reissue) }}" class="mt-4">
                         @csrf
-                        <button type="submit" class="w-full rounded-lg bg-sky-700 px-3 py-2 text-sm font-semibold text-white transition hover:bg-sky-800">
-                            Proses penerbitan ulang
-                        </button>
+                        <button type="submit" class="btn btn-primary w-full">Proses penerbitan ulang</button>
                     </form>
                 </div>
             @endif
 
             @if ($reissue->status === \App\Enums\ReissueStatus::Ditolak)
-                <div class="rounded-2xl border border-red-200 bg-red-50 p-5 text-sm text-red-800">
-                    Permohonan ditolak. Lihat catatan keputusan di samping.
-                </div>
+                <div class="alert alert-danger">Permohonan ditolak. Lihat catatan keputusan di samping.</div>
             @endif
         </section>
     </div>

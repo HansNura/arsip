@@ -1,60 +1,108 @@
-@extends('layouts.app')
+@extends('layouts.backoffice')
 
 @section('title', $batch->exists ? 'Edit Angkatan' : 'Tambah Angkatan')
 
 @section('content')
-    <div class="max-w-3xl">
-        <a href="{{ route('admin.batches.index') }}" class="text-sm font-medium text-emerald-700 hover:text-emerald-800">&larr; Kembali ke angkatan</a>
-        <h1 class="mt-3 text-3xl font-semibold tracking-tight">{{ $batch->exists ? 'Edit angkatan' : 'Tambah angkatan' }}</h1>
-        @if ($errors->any())
-            <div class="mt-5 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700"><p class="font-semibold">Periksa kembali data yang dimasukkan.</p><ul class="mt-1 list-inside list-disc">@foreach ($errors->all() as $error)<li>{{ $error }}</li>@endforeach</ul></div>
+    <div class="mb-5">
+        <a href="{{ route('admin.batches.index') }}" class="inline-flex items-center gap-2 text-sm font-medium text-forest hover:text-forest-deep">
+            <x-icon name="arrow-right" class="size-4 rotate-180" />
+            Kembali ke angkatan
+        </a>
+    </div>
+
+    <x-page-header eyebrow="Operasional" :title="$batch->exists ? 'Edit angkatan' : 'Tambah angkatan'"
+                  subtitle="Atur program, periode, kapasitas, dan status kelas." />
+
+    @if ($errors->any())
+        <div class="alert alert-danger mt-6">
+            <p class="font-semibold">Periksa kembali data yang dimasukkan.</p>
+            <ul class="mt-1 list-inside list-disc space-y-1">
+                @foreach ($errors->all() as $error)
+                    <li>{{ $error }}</li>
+                @endforeach
+            </ul>
+        </div>
+    @endif
+
+    <form method="POST" action="{{ $batch->exists ? route('admin.batches.update', $batch) : route('admin.batches.store') }}" class="mt-6 max-w-4xl space-y-6">
+        @csrf
+        @if ($batch->exists)
+            @method('PUT')
         @endif
 
-        <form method="POST" action="{{ $batch->exists ? route('admin.batches.update', $batch) : route('admin.batches.store') }}" class="mt-6 space-y-5 rounded-2xl border border-slate-200 bg-white p-6">
-            @csrf
-            @if ($batch->exists) @method('PUT') @endif
-            <div class="grid gap-5 sm:grid-cols-2">
-                <label class="block text-sm font-medium sm:col-span-2">Program
-                    <select name="program_id" required class="mt-1.5 w-full rounded-lg border-slate-300 text-sm">
+        <section class="card">
+            <div class="card-header">
+                <div>
+                    <h2 class="section-title">Program &amp; identitas</h2>
+                    <p class="section-subtitle">Satu angkatan terikat pada satu program pelatihan.</p>
+                </div>
+            </div>
+            <div class="card-body grid gap-5 sm:grid-cols-2">
+                <label class="block sm:col-span-2">
+                    <span class="field-label">Program</span>
+                    <select name="program_id" required class="field-select">
                         <option value="">Pilih program</option>
                         @foreach ($programs as $program)
-                            <option value="{{ $program->id }}" @selected(old('program_id', $batch->program_id) == $program->id)>{{ $program->nama }}{{ $program->is_active ? '' : ' (nonaktif)' }}</option>
+                            <option value="{{ $program->id }}" @selected(old('program_id', $batch->program_id) == $program->id)>
+                                {{ $program->nama }}{{ $program->is_active ? '' : ' (nonaktif)' }}
+                            </option>
                         @endforeach
                     </select>
                 </label>
-                <label class="block text-sm font-medium">Kode angkatan
-                    <input name="kode_batch" value="{{ old('kode_batch', $batch->kode_batch) }}" required maxlength="255" class="mt-1.5 w-full rounded-lg border-slate-300 text-sm">
+                <label class="block">
+                    <span class="field-label">Kode angkatan</span>
+                    <input name="kode_batch" value="{{ old('kode_batch', $batch->kode_batch) }}" required maxlength="255" class="field-input font-mono">
                 </label>
-                <label class="block text-sm font-medium">Nama kelas
-                    <input name="nama" value="{{ old('nama', $batch->nama) }}" required maxlength="255" class="mt-1.5 w-full rounded-lg border-slate-300 text-sm">
+                <label class="block">
+                    <span class="field-label">Nama kelas</span>
+                    <input name="nama" value="{{ old('nama', $batch->nama) }}" required maxlength="255" class="field-input">
                 </label>
-                <label class="block text-sm font-medium">Tahun
-                    <input type="number" min="2000" max="2100" name="tahun" value="{{ old('tahun', $batch->tahun ?? date('Y')) }}" required class="mt-1.5 w-full rounded-lg border-slate-300 text-sm">
+                <label class="block">
+                    <span class="field-label">Tahun</span>
+                    <input type="number" min="2000" max="2100" name="tahun" value="{{ old('tahun', $batch->tahun ?? date('Y')) }}" required class="field-input font-mono">
                 </label>
-                <label class="block text-sm font-medium">Kuota
-                    <input type="number" min="1" name="kuota" value="{{ old('kuota', $batch->kuota) }}" class="mt-1.5 w-full rounded-lg border-slate-300 text-sm">
+                <label class="block">
+                    <span class="field-label">Kuota</span>
+                    <input type="number" min="1" name="kuota" value="{{ old('kuota', $batch->kuota) }}" class="field-input">
                 </label>
-                <label class="block text-sm font-medium">Tanggal mulai
-                    <input type="date" name="tanggal_mulai" value="{{ old('tanggal_mulai', $batch->tanggal_mulai?->format('Y-m-d')) }}" class="mt-1.5 w-full rounded-lg border-slate-300 text-sm">
+            </div>
+        </section>
+
+        <section class="card">
+            <div class="card-header">
+                <div>
+                    <h2 class="section-title">Jadwal &amp; lokasi</h2>
+                    <p class="section-subtitle">Tanggal selesai dipakai sebagai basis retensi alumni.</p>
+                </div>
+            </div>
+            <div class="card-body grid gap-5 sm:grid-cols-2">
+                <label class="block">
+                    <span class="field-label">Tanggal mulai</span>
+                    <input type="date" name="tanggal_mulai" value="{{ old('tanggal_mulai', $batch->tanggal_mulai?->format('Y-m-d')) }}" class="field-input">
                 </label>
-                <label class="block text-sm font-medium">Tanggal selesai
-                    <input type="date" name="tanggal_selesai" value="{{ old('tanggal_selesai', $batch->tanggal_selesai?->format('Y-m-d')) }}" class="mt-1.5 w-full rounded-lg border-slate-300 text-sm">
+                <label class="block">
+                    <span class="field-label">Tanggal selesai</span>
+                    <input type="date" name="tanggal_selesai" value="{{ old('tanggal_selesai', $batch->tanggal_selesai?->format('Y-m-d')) }}" class="field-input">
                 </label>
-                <label class="block text-sm font-medium">Lokasi
-                    <input name="lokasi" value="{{ old('lokasi', $batch->lokasi) }}" maxlength="255" class="mt-1.5 w-full rounded-lg border-slate-300 text-sm">
+                <label class="block">
+                    <span class="field-label">Lokasi</span>
+                    <input name="lokasi" value="{{ old('lokasi', $batch->lokasi) }}" maxlength="255" class="field-input">
                 </label>
-                <label class="block text-sm font-medium">Status
-                    <select name="status" required class="mt-1.5 w-full rounded-lg border-slate-300 text-sm">
+                <label class="block">
+                    <span class="field-label">Status</span>
+                    <select name="status" required class="field-select">
                         @foreach ($statuses as $status)
-                            <option value="{{ $status->value }}" @selected(old('status', $batch->status?->value ?? \App\Enums\BatchStatus::Direncanakan->value) === $status->value)>{{ ucfirst(str_replace('_', ' ', $status->value)) }}</option>
+                            <option value="{{ $status->value }}" @selected(old('status', $batch->status?->value ?? \App\Enums\BatchStatus::Direncanakan->value) === $status->value)>
+                                {{ ucfirst(str_replace('_', ' ', $status->value)) }}
+                            </option>
                         @endforeach
                     </select>
                 </label>
             </div>
-            <div class="flex justify-end gap-3">
-                <a href="{{ route('admin.batches.index') }}" class="rounded-xl border border-slate-300 px-4 py-2.5 text-sm font-semibold text-slate-700">Batal</a>
-                <button class="rounded-xl bg-emerald-700 px-4 py-2.5 text-sm font-semibold text-white hover:bg-emerald-800">Simpan</button>
+            <div class="flex items-center justify-end gap-3 border-t border-ink/10 px-5 py-4 sm:px-6">
+                <a href="{{ route('admin.batches.index') }}" class="btn btn-secondary">Batal</a>
+                <button type="submit" class="btn btn-primary">Simpan angkatan</button>
             </div>
-        </form>
-    </div>
+        </section>
+    </form>
 @endsection

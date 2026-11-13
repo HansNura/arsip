@@ -1,52 +1,80 @@
-@extends('layouts.app')
+@extends('layouts.backoffice')
 
 @section('title', 'Angkatan')
 
 @section('content')
-    <div class="flex flex-wrap items-end justify-between gap-4">
-        <div>
-            <h1 class="text-3xl font-semibold tracking-tight">Angkatan &amp; Kelas</h1>
-            <p class="mt-2 text-sm text-slate-600">Kelola kelas pelatihan dan buka daftar pendaftaran, absensi, serta nilai.</p>
-        </div>
-        <a href="{{ route('admin.batches.create') }}" class="rounded-xl bg-emerald-700 px-4 py-2.5 text-sm font-semibold text-white hover:bg-emerald-800">Tambah angkatan</a>
-    </div>
+    <x-page-header eyebrow="Operasional" title="Angkatan & Kelas" subtitle="Kelola kelas pelatihan dan buka daftar pendaftaran, absensi, serta nilai.">
+        <a href="{{ route('admin.batches.create') }}" class="btn btn-primary btn-sm">
+            <x-icon name="plus" class="size-4" />
+            Tambah angkatan
+        </a>
+    </x-page-header>
 
     @if ($errors->has('batch'))
-        <div class="mt-5 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">{{ $errors->first('batch') }}</div>
+        <div class="alert alert-danger mt-6">{{ $errors->first('batch') }}</div>
     @endif
 
-    <div class="mt-6 overflow-hidden rounded-2xl border border-slate-200 bg-white">
-        <div class="overflow-x-auto">
-            <table class="min-w-full divide-y divide-slate-200 text-sm">
-                <thead class="bg-slate-50 text-left text-xs font-semibold uppercase tracking-wide text-slate-500">
-                    <tr><th class="px-5 py-3">Angkatan</th><th class="px-5 py-3">Program</th><th class="px-5 py-3">Tahun</th><th class="px-5 py-3">Periode</th><th class="px-5 py-3">Peserta</th><th class="px-5 py-3">Status</th><th class="px-5 py-3 text-right">Aksi</th></tr>
+    <div class="table-shell mt-6">
+        <div class="table-scroll">
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>Angkatan</th>
+                        <th>Program</th>
+                        <th>Tahun</th>
+                        <th>Periode</th>
+                        <th>Peserta</th>
+                        <th>Status</th>
+                        <th class="text-right">Aksi</th>
+                    </tr>
                 </thead>
-                <tbody class="divide-y divide-slate-100">
+                <tbody>
                     @forelse ($batches as $batch)
+                        @php
+                            $statusClass = match ($batch->status->value) {
+                                'berjalan' => 'badge-info',
+                                'selesai' => 'badge-valid',
+                                'dibatalkan' => 'badge-cancelled',
+                                default => 'badge-neutral',
+                            };
+                        @endphp
                         <tr>
-                            <td class="px-5 py-3.5"><a href="{{ route('admin.batches.show', $batch) }}" class="font-medium text-emerald-800 hover:underline">{{ $batch->nama }}</a><p class="mt-0.5 font-mono text-xs text-slate-500">{{ $batch->kode_batch }}</p></td>
-                            <td class="px-5 py-3.5 text-slate-600">{{ $batch->program->nama }}</td>
-                            <td class="px-5 py-3.5 text-slate-600">{{ $batch->tahun }}</td>
-                            <td class="px-5 py-3.5 text-slate-600">{{ $batch->tanggal_mulai?->format('d M Y') ?? '—' }} – {{ $batch->tanggal_selesai?->format('d M Y') ?? '—' }}</td>
-                            <td class="px-5 py-3.5 text-slate-600">{{ $batch->enrollments_count }}{{ $batch->kuota ? ' / '.$batch->kuota : '' }}</td>
-                            <td class="px-5 py-3.5">{{ str_replace('_', ' ', $batch->status->value) }}</td>
-                            <td class="px-5 py-3.5">
-                                <div class="flex justify-end gap-2">
-                                    <a href="{{ route('admin.batches.show', $batch) }}" class="rounded-lg border border-emerald-200 px-3 py-1.5 text-xs font-semibold text-emerald-800 hover:bg-emerald-50">Kelola</a>
-                                    <a href="{{ route('admin.batches.edit', $batch) }}" class="rounded-lg border border-slate-300 px-3 py-1.5 text-xs font-semibold text-slate-700 hover:bg-slate-50">Edit</a>
+                            <td>
+                                <a href="{{ route('admin.batches.show', $batch) }}" class="font-semibold text-ink hover:text-forest">{{ $batch->nama }}</a>
+                                <p class="mt-0.5 font-mono text-xs text-ink/45">{{ $batch->kode_batch }}</p>
+                            </td>
+                            <td>{{ $batch->program->nama }}</td>
+                            <td class="font-mono text-xs">{{ $batch->tahun }}</td>
+                            <td>{{ $batch->tanggal_mulai?->format('d M Y') ?? '—' }} – {{ $batch->tanggal_selesai?->format('d M Y') ?? '—' }}</td>
+                            <td class="font-mono text-xs">{{ $batch->enrollments_count }}{{ $batch->kuota ? ' / '.$batch->kuota : '' }}</td>
+                            <td><span class="badge {{ $statusClass }}">{{ str_replace('_', ' ', $batch->status->value) }}</span></td>
+                            <td>
+                                <div class="flex items-center justify-end gap-2">
+                                    <a href="{{ route('admin.batches.show', $batch) }}" class="btn btn-secondary btn-sm">Kelola</a>
+                                    <a href="{{ route('admin.batches.edit', $batch) }}" class="btn btn-ghost btn-sm">Edit</a>
                                     <form method="POST" action="{{ route('admin.batches.destroy', $batch) }}" onsubmit="return confirm('Arsipkan angkatan ini?')">
-                                        @csrf @method('DELETE')
-                                        <button class="rounded-lg border border-red-200 px-3 py-1.5 text-xs font-semibold text-red-700 hover:bg-red-50">Arsipkan</button>
+                                        @csrf
+                                        @method('DELETE')
+                                        <button type="submit" class="btn btn-danger btn-sm">Arsipkan</button>
                                     </form>
                                 </div>
                             </td>
                         </tr>
                     @empty
-                        <tr><td colspan="7" class="px-5 py-8 text-center text-slate-500">Belum ada angkatan.</td></tr>
+                        <tr>
+                            <td colspan="7" class="table-empty">
+                                <x-empty-state icon="layers" title="Belum ada angkatan" description="Buat angkatan pertama untuk mulai mendaftarkan peserta.">
+                                    <a href="{{ route('admin.batches.create') }}" class="btn btn-primary btn-sm">Tambah angkatan</a>
+                                </x-empty-state>
+                            </td>
+                        </tr>
                     @endforelse
                 </tbody>
             </table>
         </div>
-        @if ($batches->hasPages()) <div class="border-t border-slate-200 px-5 py-4">{{ $batches->links() }}</div> @endif
+
+        @if ($batches->hasPages())
+            <div class="border-t border-ink/10 px-5 py-4">{{ $batches->links() }}</div>
+        @endif
     </div>
 @endsection

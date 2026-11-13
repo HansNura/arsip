@@ -1,30 +1,33 @@
-@extends('layouts.app')
+@extends('layouts.backoffice')
 
 @section('title', 'Sertifikat')
 
 @section('content')
-    <div class="flex flex-wrap items-end justify-between gap-4">
-        <div>
-            <h1 class="text-3xl font-semibold tracking-tight text-slate-900">Sertifikat</h1>
-            <p class="mt-2 text-sm text-slate-600">Terbitkan, pantau, dan unduh sertifikat peserta yang lulus.</p>
-        </div>
-        <a href="{{ route('admin.certificate-templates.edit') }}" class="rounded-xl border border-slate-300 px-4 py-2.5 text-sm font-semibold text-slate-700 transition hover:border-slate-400 hover:bg-slate-50">
+    <x-page-header eyebrow="Sertifikasi" title="Sertifikat" subtitle="Terbitkan, pantau, dan unduh sertifikat peserta yang lulus.">
+        <a href="{{ route('admin.certificate-templates.edit') }}" class="btn btn-secondary btn-sm">
+            <x-icon name="settings" class="size-4" />
             Template &amp; tanda tangan
         </a>
-    </div>
+    </x-page-header>
 
     @if ($errors->has('certificate') || $errors->has('enrollment') || $errors->has('template'))
-        <div class="mt-6 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+        <div class="alert alert-danger mt-6">
             {{ $errors->first('certificate') ?: $errors->first('enrollment') ?: $errors->first('template') }}
         </div>
     @endif
 
-    <section class="mt-6 rounded-2xl border border-slate-200 bg-white p-5">
-        <h2 class="text-sm font-semibold uppercase tracking-wide text-slate-500">Terbitkan per angkatan</h2>
-        <form method="POST" action="{{ route('admin.certificates.store-batch-request') }}" class="mt-4 flex flex-wrap items-end gap-3">
+    <section class="card mt-6">
+        <div class="card-header">
+            <div>
+                <h2 class="section-title">Terbitkan per angkatan</h2>
+                <p class="section-subtitle">Hanya peserta lulus dan belum memiliki sertifikat aktif yang diproses.</p>
+            </div>
+        </div>
+        <form method="POST" action="{{ route('admin.certificates.store-batch-request') }}" class="card-body flex flex-wrap items-end gap-3">
             @csrf
-            <label class="block text-sm font-medium">Angkatan
-                <select name="batch_id" required class="mt-1.5 block min-w-72 rounded-lg border-slate-300 text-sm">
+            <label class="block min-w-72 flex-1">
+                <span class="field-label">Angkatan</span>
+                <select name="batch_id" required class="field-select">
                     <option value="">Pilih angkatan</option>
                     @foreach ($batches as $batch)
                         <option value="{{ $batch->id }}" @selected(($filters['batch_id'] ?? '') == $batch->id)>
@@ -33,75 +36,78 @@
                     @endforeach
                 </select>
             </label>
-            <button type="submit" class="rounded-xl bg-emerald-700 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-emerald-800">
+            <button type="submit" class="btn btn-primary">
+                <x-icon name="certificate" class="size-4" />
                 Terbitkan semua yang lulus
             </button>
         </form>
-        <p class="mt-2 text-xs text-slate-500">Hanya peserta berstatus lulus dan belum memiliki sertifikat aktif yang diproses.</p>
     </section>
 
-    <form method="GET" action="{{ route('admin.certificates.index') }}" class="mt-6 grid gap-4 rounded-2xl border border-slate-200 bg-white p-5 sm:grid-cols-2 lg:grid-cols-4">
-        <label class="block text-sm font-medium">Cari nomor atau nama
-            <input name="q" value="{{ $filters['q'] ?? '' }}" placeholder="PEL/2026/0001 atau nama peserta" class="mt-1.5 w-full rounded-lg border-slate-300 text-sm">
-        </label>
-        <label class="block text-sm font-medium">Status
-            <select name="status" class="mt-1.5 w-full rounded-lg border-slate-300 text-sm">
-                <option value="">Semua status</option>
-                @foreach ($statuses as $status)
-                    <option value="{{ $status->value }}" @selected(($filters['status'] ?? '') === $status->value)>{{ ucfirst($status->value) }}</option>
-                @endforeach
-            </select>
-        </label>
-        <label class="block text-sm font-medium">Angkatan
-            <select name="batch_id" class="mt-1.5 w-full rounded-lg border-slate-300 text-sm">
-                <option value="">Semua angkatan</option>
-                @foreach ($batches as $batch)
-                    <option value="{{ $batch->id }}" @selected(($filters['batch_id'] ?? '') == $batch->id)>
-                        {{ $batch->nama }} · {{ $batch->tahun }}
-                    </option>
-                @endforeach
-            </select>
-        </label>
-        <div class="flex items-center gap-3">
-            <button type="submit" class="rounded-xl bg-slate-900 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-slate-800">Terapkan</button>
-            <a href="{{ route('admin.certificates.index') }}" class="text-sm font-medium text-slate-600 hover:text-slate-900">Reset</a>
+    <form method="GET" action="{{ route('admin.certificates.index') }}" class="card mt-6 p-5">
+        <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+            <label class="block">
+                <span class="field-label">Cari nomor atau nama</span>
+                <input name="q" value="{{ $filters['q'] ?? '' }}" placeholder="PEL/2026/0001 atau nama peserta" class="field-input">
+            </label>
+            <label class="block">
+                <span class="field-label">Status</span>
+                <select name="status" class="field-select">
+                    <option value="">Semua status</option>
+                    @foreach ($statuses as $status)
+                        <option value="{{ $status->value }}" @selected(($filters['status'] ?? '') === $status->value)>{{ ucfirst($status->value) }}</option>
+                    @endforeach
+                </select>
+            </label>
+            <label class="block">
+                <span class="field-label">Angkatan</span>
+                <select name="batch_id" class="field-select">
+                    <option value="">Semua angkatan</option>
+                    @foreach ($batches as $batch)
+                        <option value="{{ $batch->id }}" @selected(($filters['batch_id'] ?? '') == $batch->id)>{{ $batch->nama }} · {{ $batch->tahun }}</option>
+                    @endforeach
+                </select>
+            </label>
+            <div class="flex items-end gap-2">
+                <button type="submit" class="btn btn-primary">Terapkan</button>
+                <a href="{{ route('admin.certificates.index') }}" class="btn btn-ghost btn-sm">Reset</a>
+            </div>
         </div>
     </form>
 
     @if ($selectedBatch)
-        <section class="mt-6 overflow-hidden rounded-2xl border border-slate-200 bg-white">
-            <div class="border-b border-slate-200 px-5 py-4">
-                <h2 class="text-sm font-semibold text-slate-900">Peserta lulus belum bersertifikat — {{ $selectedBatch->nama }}</h2>
-                <p class="mt-1 text-xs text-slate-500">{{ $eligibleEnrollments->count() }} peserta menunggu penerbitan.</p>
+        <section class="card mt-6">
+            <div class="card-header">
+                <div>
+                    <h2 class="section-title">Peserta lulus belum bersertifikat</h2>
+                    <p class="section-subtitle">{{ $selectedBatch->nama }} · {{ $eligibleEnrollments->count() }} peserta menunggu penerbitan.</p>
+                </div>
             </div>
-            <div class="overflow-x-auto">
-                <table class="min-w-full divide-y divide-slate-200 text-sm">
-                    <thead class="bg-slate-50 text-left text-xs font-semibold uppercase tracking-wide text-slate-500">
+            <div class="table-scroll">
+                <table class="data-table">
+                    <thead>
                         <tr>
-                            <th class="px-5 py-3">Peserta</th>
-                            <th class="px-5 py-3">Nomor peserta</th>
-                            <th class="px-5 py-3">Nilai akhir</th>
-                            <th class="px-5 py-3 text-right">Aksi</th>
+                            <th>Peserta</th>
+                            <th>Nomor peserta</th>
+                            <th>Nilai akhir</th>
+                            <th class="text-right">Aksi</th>
                         </tr>
                     </thead>
-                    <tbody class="divide-y divide-slate-100">
+                    <tbody>
                         @forelse ($eligibleEnrollments as $enrollment)
                             <tr>
-                                <td class="px-5 py-3.5 font-medium text-slate-900">{{ $enrollment->participant->nama_lengkap }}</td>
-                                <td class="px-5 py-3.5 text-slate-600">{{ $enrollment->nomor_peserta ?? '—' }}</td>
-                                <td class="px-5 py-3.5 text-slate-600">{{ $enrollment->nilai_akhir ?? '—' }}</td>
-                                <td class="px-5 py-3.5 text-right">
+                                <td><span class="font-semibold text-ink">{{ $enrollment->participant->nama_lengkap }}</span></td>
+                                <td class="font-mono text-xs">{{ $enrollment->nomor_peserta ?? '—' }}</td>
+                                <td class="font-mono text-xs">{{ $enrollment->nilai_akhir ?? '—' }}</td>
+                                <td class="text-right">
                                     <form method="POST" action="{{ route('admin.certificates.store', $enrollment) }}">
                                         @csrf
-                                        <button type="submit" class="rounded-lg border border-emerald-200 px-3 py-1.5 text-xs font-semibold text-emerald-700 transition hover:bg-emerald-50">
-                                            Terbitkan
-                                        </button>
+                                        <button type="submit" class="btn btn-secondary btn-sm">Terbitkan</button>
                                     </form>
                                 </td>
                             </tr>
                         @empty
                             <tr>
-                                <td colspan="4" class="px-5 py-8 text-center text-slate-500">Tidak ada peserta lulus yang menunggu penerbitan.</td>
+                                <td colspan="4" class="table-empty">Tidak ada peserta lulus yang menunggu penerbitan.</td>
                             </tr>
                         @endforelse
                     </tbody>
@@ -110,54 +116,54 @@
         </section>
     @endif
 
-    <div class="mt-6 overflow-hidden rounded-2xl border border-slate-200 bg-white">
-        <div class="overflow-x-auto">
-            <table class="min-w-full divide-y divide-slate-200 text-sm">
-                <thead class="bg-slate-50 text-left text-xs font-semibold uppercase tracking-wide text-slate-500">
+    <div class="table-shell mt-6">
+        <div class="table-scroll">
+            <table class="data-table">
+                <thead>
                     <tr>
-                        <th class="px-5 py-3">Nomor</th>
-                        <th class="px-5 py-3">Peserta</th>
-                        <th class="px-5 py-3">Program</th>
-                        <th class="px-5 py-3">Angkatan</th>
-                        <th class="px-5 py-3">Status</th>
-                        <th class="px-5 py-3">Terbit</th>
-                        <th class="px-5 py-3 text-right">Aksi</th>
+                        <th>Nomor</th>
+                        <th>Peserta</th>
+                        <th>Program</th>
+                        <th>Angkatan</th>
+                        <th>Status</th>
+                        <th>Terbit</th>
+                        <th class="text-right">Aksi</th>
                     </tr>
                 </thead>
-                <tbody class="divide-y divide-slate-100">
+                <tbody>
                     @forelse ($certificates as $certificate)
                         <tr>
-                            <td class="px-5 py-3.5 font-medium text-slate-900">{{ $certificate->nomor_sertifikat }}</td>
-                            <td class="px-5 py-3.5 text-slate-600">{{ $certificate->enrollment?->participant?->nama_lengkap ?? '—' }}</td>
-                            <td class="px-5 py-3.5 text-slate-600">{{ $certificate->enrollment?->batch?->program?->nama ?? '—' }}</td>
-                            <td class="px-5 py-3.5 text-slate-600">
+                            <td><span class="font-mono text-xs font-medium text-ink">{{ $certificate->nomor_sertifikat }}</span></td>
+                            <td>{{ $certificate->enrollment?->participant?->nama_lengkap ?? '—' }}</td>
+                            <td>{{ $certificate->enrollment?->batch?->program?->nama ?? '—' }}</td>
+                            <td>
                                 {{ $certificate->enrollment?->batch?->nama ?? '—' }}
                                 @if ($certificate->enrollment?->batch?->tahun)
-                                    <span class="text-slate-400">· {{ $certificate->enrollment->batch->tahun }}</span>
+                                    <span class="text-xs text-ink/35">· {{ $certificate->enrollment->batch->tahun }}</span>
                                 @endif
                             </td>
-                            <td class="px-5 py-3.5">
-                                <span class="rounded-full px-2.5 py-1 text-xs font-medium
-                                    {{ $certificate->status === \App\Enums\CertificateStatus::Aktif
-                                        ? 'bg-emerald-100 text-emerald-800'
-                                        : 'bg-slate-100 text-slate-600' }}">
+                            <td>
+                                <span @class(['badge', 'badge-valid' => $certificate->status === \App\Enums\CertificateStatus::Aktif, 'badge-neutral' => $certificate->status !== \App\Enums\CertificateStatus::Aktif])>
                                     {{ ucfirst($certificate->status->value) }}
                                 </span>
                             </td>
-                            <td class="px-5 py-3.5 text-slate-600">{{ $certificate->tanggal_terbit?->format('d-m-Y') ?? '—' }}</td>
-                            <td class="px-5 py-3.5 text-right">
+                            <td class="font-mono text-xs">{{ $certificate->tanggal_terbit?->format('d-m-Y') ?? '—' }}</td>
+                            <td class="text-right">
                                 @if ($certificate->file_path)
-                                    <a href="{{ route('admin.certificates.download', $certificate) }}" class="rounded-lg border border-slate-300 px-3 py-1.5 text-xs font-semibold text-slate-700 transition hover:border-slate-400 hover:bg-slate-50">
+                                    <a href="{{ route('admin.certificates.download', $certificate) }}" class="btn btn-secondary btn-sm">
+                                        <x-icon name="download" class="size-3.5" />
                                         Unduh PDF
                                     </a>
                                 @else
-                                    <span class="text-xs text-slate-400">Belum ada berkas</span>
+                                    <span class="text-xs text-ink/35">Belum ada berkas</span>
                                 @endif
                             </td>
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="7" class="px-5 py-8 text-center text-slate-500">Belum ada sertifikat.</td>
+                            <td colspan="7" class="table-empty">
+                                <x-empty-state icon="certificate" title="Belum ada sertifikat" description="Terbitkan sertifikat untuk peserta yang sudah lulus." />
+                            </td>
                         </tr>
                     @endforelse
                 </tbody>
@@ -165,9 +171,7 @@
         </div>
 
         @if ($certificates->hasPages())
-            <div class="border-t border-slate-200 px-5 py-4">
-                {{ $certificates->links() }}
-            </div>
+            <div class="border-t border-ink/10 px-5 py-4">{{ $certificates->links() }}</div>
         @endif
     </div>
 @endsection

@@ -4,28 +4,30 @@
     <meta charset="utf-8">
     <title>Sertifikat {{ $nomor }}</title>
     <style>
-        @page { margin: 0; }
+        @page { size: A4 landscape; margin: 0; }
         * { box-sizing: border-box; }
-        body { margin: 0; font-family: 'DejaVu Sans', sans-serif; color: #0f172a; }
-        .page { position: relative; width: 297mm; height: 210mm; padding: 12mm; }
-        .frame { position: absolute; top: 8mm; left: 8mm; right: 8mm; bottom: 8mm; border: 2.5mm solid #047857; }
-        .inner { position: absolute; top: 13mm; left: 13mm; right: 13mm; bottom: 13mm; border: 0.4mm solid #94a3b8; }
-        .content { position: absolute; top: 26mm; left: 30mm; right: 30mm; text-align: center; }
-        .kicker { margin: 0; font-size: 11pt; letter-spacing: 4px; text-transform: uppercase; color: #047857; }
-        h1 { margin: 5mm 0 0; font-size: 34pt; letter-spacing: 2px; }
-        .subtitle { margin: 3mm 0 0; font-size: 12pt; color: #475569; }
-        .name { margin: 7mm 0 0; font-size: 26pt; font-weight: bold; }
-        .program { margin: 4mm 0 0; font-size: 15pt; }
-        .meta { margin: 3mm 0 0; font-size: 11pt; color: #475569; }
-        .number { margin-top: 4mm; font-size: 9pt; color: #64748b; }
-        .footer { position: absolute; left: 30mm; right: 30mm; bottom: 26mm; }
+        body { margin: 0; font-family: 'DejaVu Sans', sans-serif; color: #10231c; }
+        .page { position: relative; width: 297mm; height: 209mm; margin: 0; padding: 0; background: #fdfdf8; overflow: hidden; }
+        .frame { position: absolute; top: 8mm; left: 8mm; right: 8mm; bottom: 8mm; border: 2.2mm solid #145c43; }
+        .inner { position: absolute; top: 13mm; left: 13mm; right: 13mm; bottom: 13mm; border: 0.35mm solid #b58a4b; }
+        .content { margin: 26mm 30mm 0; text-align: center; }
+        .seal { width: 20mm; margin: 0 auto; border: 0.6mm solid #b58a4b; background: #145c43; color: #fdfdf8; font-family: 'DejaVu Serif', serif; font-size: 15pt; font-weight: bold; line-height: 1.2; letter-spacing: 1px; text-align: center; padding: 3.5mm 0; }
+        .kicker { margin: 6mm 0 0; font-size: 10pt; letter-spacing: 4px; text-transform: uppercase; color: #145c43; }
+        h1 { margin: 3mm 0 0; font-family: 'DejaVu Serif', serif; font-size: 34pt; letter-spacing: 2px; color: #10231c; }
+        .rule { width: 46mm; margin: 4mm auto 0; border-top: 0.5mm solid #b58a4b; }
+        .subtitle { margin: 4mm 0 0; font-size: 12pt; color: #4d6157; }
+        .name { margin: 7mm 0 0; font-family: 'DejaVu Serif', serif; font-size: 26pt; font-weight: bold; color: #10231c; }
+        .program { margin: 4mm 0 0; font-size: 15pt; color: #145c43; }
+        .meta { margin: 3mm 0 0; font-size: 11pt; color: #4d6157; }
+        .number { margin-top: 5mm; font-size: 9pt; color: #6b7b72; letter-spacing: 0.4px; }
+        .footer { margin: 5mm 30mm 0; page-break-inside: avoid; }
         .footer table { width: 100%; }
         .footer td { vertical-align: bottom; }
-        .signature { width: 70mm; text-align: center; font-size: 10pt; color: #334155; }
-        .signature .image { height: 20mm; margin-bottom: 2mm; }
-        .signature .line { border-top: 0.4mm solid #334155; padding-top: 2mm; font-weight: bold; font-size: 11pt; color: #0f172a; }
-        .qr { text-align: right; font-size: 8pt; color: #64748b; }
-        .qr img { width: 28mm; height: 28mm; }
+        .signature { width: 70mm; text-align: center; font-size: 10pt; color: #4d6157; }
+        .signature .image { height: 16mm; margin-bottom: 2mm; }
+        .signature .line { border-top: 0.35mm solid #10231c; padding-top: 2mm; font-weight: bold; font-size: 11pt; color: #10231c; }
+        .qr { text-align: right; font-size: 8pt; color: #6b7b72; }
+        .qr img { width: 22mm; height: 22mm; }
     </style>
 </head>
 <body>
@@ -34,8 +36,10 @@
     <div class="inner"></div>
 
     <div class="content">
+        <div class="seal">eA</div>
         <p class="kicker">Sertifikat Pelatihan</p>
         <h1>SERTIFIKAT</h1>
+        <div class="rule"></div>
         <p class="subtitle">Diberikan kepada</p>
         <p class="name">{{ $nama_peserta }}</p>
         <p class="subtitle">atas keberhasilan menyelesaikan</p>

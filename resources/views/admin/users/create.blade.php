@@ -1,15 +1,19 @@
-@extends('layouts.app')
+@extends('layouts.backoffice')
 
 @section('title', 'Tambah Pengguna')
 
 @section('content')
-    <div class="mx-auto max-w-2xl">
-        <div>
-            <h1 class="text-3xl font-semibold tracking-tight text-slate-900">Tambah Pengguna</h1>
-            <p class="mt-2 text-sm text-slate-600">Buat akun baru untuk admin atau staf arsip.</p>
-        </div>
+    <div class="mb-5">
+        <a href="{{ route('admin.users.index') }}" class="inline-flex items-center gap-2 text-sm font-medium text-forest hover:text-forest-deep">
+            <x-icon name="arrow-right" class="size-4 rotate-180" />
+            Kembali ke pengguna
+        </a>
+    </div>
 
-        <div class="mt-6 rounded-2xl border border-slate-200 bg-white p-6">
+    <x-page-header eyebrow="Administrasi" title="Tambah Pengguna" subtitle="Buat akun baru untuk admin atau staf arsip." />
+
+    <div class="card mt-6 max-w-3xl">
+        <div class="card-body">
             @include('admin.users._form', [
                 'action' => route('admin.users.store'),
                 'method' => 'POST',

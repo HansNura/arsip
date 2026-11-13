@@ -1,49 +1,52 @@
-@extends('layouts.app')
+@extends('layouts.backoffice')
 
 @section('title', 'Kebijakan Retensi Data')
 
 @section('content')
-    <div class="flex flex-wrap items-end justify-between gap-4">
-        <div>
-            <h1 class="text-3xl font-semibold tracking-tight">Kebijakan Retensi Data</h1>
-            <p class="mt-2 text-sm text-slate-600">Atur pengarsipan alumni setelah masa retensi berdasarkan tanggal selesai pelatihan.</p>
-        </div>
-        <a href="{{ route('admin.retention.create') }}" class="rounded-xl bg-emerald-700 px-4 py-2.5 text-sm font-semibold text-white hover:bg-emerald-800">Tambah kebijakan</a>
-    </div>
+    <x-page-header eyebrow="Administrasi" title="Kebijakan Retensi Data" subtitle="Atur pengarsipan alumni setelah masa retensi berdasarkan tanggal selesai pelatihan.">
+        <a href="{{ route('admin.retention.create') }}" class="btn btn-primary btn-sm">
+            <x-icon name="plus" class="size-4" />
+            Tambah kebijakan
+        </a>
+    </x-page-header>
 
-    <section class="mt-6 overflow-hidden rounded-2xl border border-slate-200 bg-white">
-        <div class="overflow-x-auto">
-            <table class="min-w-full divide-y divide-slate-200 text-sm">
-                <thead class="bg-slate-50 text-left text-xs font-semibold uppercase tracking-wide text-slate-500">
+    <section class="table-shell mt-6">
+        <div class="table-scroll">
+            <table class="data-table">
+                <thead>
                     <tr>
-                        <th class="px-5 py-3">Nama</th>
-                        <th class="px-5 py-3">Retensi</th>
-                        <th class="px-5 py-3">Tindakan</th>
-                        <th class="px-5 py-3">Status</th>
-                        <th class="px-5 py-3 text-right">Aksi</th>
+                        <th>Nama</th>
+                        <th>Retensi</th>
+                        <th>Tindakan</th>
+                        <th>Status</th>
+                        <th class="text-right">Aksi</th>
                     </tr>
                 </thead>
-                <tbody class="divide-y divide-slate-100">
+                <tbody>
                     @forelse ($policies as $policy)
                         <tr>
-                            <td class="px-5 py-3.5 font-medium">{{ $policy->nama }}</td>
-                            <td class="px-5 py-3.5 text-slate-600">{{ $policy->retention_years }} tahun setelah tanggal selesai</td>
-                            <td class="px-5 py-3.5 text-slate-600">
+                            <td><span class="font-semibold text-ink">{{ $policy->nama }}</span></td>
+                            <td><span class="font-mono text-xs">{{ $policy->retention_years }} tahun</span><span class="ml-2 text-xs text-ink/40">setelah selesai</span></td>
+                            <td>
                                 @switch($policy->action)
                                     @case('cold_storage') Arsip statis (penyimpanan dingin) @break
-                                    @case('arsipkan') Arsip dinamis (tetap tersedia di sistem) @break
+                                    @case('arsipkan') Arsip dinamis (tetap tersedia) @break
                                     @case('hapus_lembut') Soft-delete (dapat dipulihkan) @break
                                 @endswitch
                             </td>
-                            <td class="px-5 py-3.5">
-                                <span class="{{ $policy->is_active ? 'text-emerald-700' : 'text-slate-500' }}">{{ $policy->is_active ? 'Aktif' : 'Nonaktif' }}</span>
-                            </td>
-                            <td class="px-5 py-3.5 text-right">
-                                <a href="{{ route('admin.retention.edit', $policy) }}" class="rounded-lg border border-slate-300 px-3 py-1.5 text-xs font-semibold text-slate-700 hover:bg-slate-50">Edit</a>
+                            <td><span @class(['badge', 'badge-valid' => $policy->is_active, 'badge-neutral' => ! $policy->is_active])>{{ $policy->is_active ? 'Aktif' : 'Nonaktif' }}</span></td>
+                            <td class="text-right">
+                                <a href="{{ route('admin.retention.edit', $policy) }}" class="btn btn-secondary btn-sm">Edit</a>
                             </td>
                         </tr>
                     @empty
-                        <tr><td colspan="5" class="px-5 py-8 text-center text-slate-500">Belum ada kebijakan retensi.</td></tr>
+                        <tr>
+                            <td colspan="5" class="table-empty">
+                                <x-empty-state icon="archive" title="Belum ada kebijakan" description="Tambahkan kebijakan retensi untuk mengarsipkan alumni lama.">
+                                    <a href="{{ route('admin.retention.create') }}" class="btn btn-primary btn-sm">Tambah kebijakan</a>
+                                </x-empty-state>
+                            </td>
+                        </tr>
                     @endforelse
                 </tbody>
             </table>
@@ -51,53 +54,59 @@
     </section>
 
     <section class="mt-8">
-        <div>
-            <h2 class="text-xl font-semibold tracking-tight">Data alumni yang diarsipkan</h2>
-            <p class="mt-1 text-sm text-slate-600">Data soft-delete dapat dipulihkan. Pemulihan arsip mengembalikan penyimpanan ke tier dinamis.</p>
+        <div class="page-header">
+            <div>
+                <h2 class="section-title">Data alumni yang diarsipkan</h2>
+                <p class="section-subtitle">Data soft-delete dapat dipulihkan. Pemulihan mengembalikan penyimpanan ke tier dinamis.</p>
+            </div>
         </div>
 
-        <div class="mt-4 overflow-hidden rounded-2xl border border-slate-200 bg-white">
-            <div class="overflow-x-auto">
-                <table class="min-w-full divide-y divide-slate-200 text-sm">
-                    <thead class="bg-slate-50 text-left text-xs font-semibold uppercase tracking-wide text-slate-500">
+        <div class="table-shell mt-4">
+            <div class="table-scroll">
+                <table class="data-table">
+                    <thead>
                         <tr>
-                            <th class="px-5 py-3">Nama</th>
-                            <th class="px-5 py-3">NIK</th>
-                            <th class="px-5 py-3">Penyimpanan</th>
-                            <th class="px-5 py-3">Diarsipkan</th>
-                            <th class="px-5 py-3 text-right">Aksi</th>
+                            <th>Nama</th>
+                            <th>NIK</th>
+                            <th>Penyimpanan</th>
+                            <th>Diarsipkan</th>
+                            <th class="text-right">Aksi</th>
                         </tr>
                     </thead>
-                    <tbody class="divide-y divide-slate-100">
+                    <tbody>
                         @forelse ($archivedParticipants as $participant)
                             <tr>
-                                <td class="px-5 py-3.5 font-medium">{{ $participant->nama_lengkap }}</td>
-                                <td class="px-5 py-3.5 font-mono text-xs text-slate-600">{{ $participant->nik }}</td>
-                                <td class="px-5 py-3.5 text-slate-600">
+                                <td><span class="font-semibold text-ink">{{ $participant->nama_lengkap }}</span></td>
+                                <td><span class="font-mono text-xs">{{ $participant->nik }}</span></td>
+                                <td>
                                     @if ($participant->trashed())
-                                        Soft-delete
+                                        <span class="badge badge-cancelled">Soft-delete</span>
                                     @elseif ($participant->storage_tier === 'cold')
-                                        Statis
+                                        <span class="badge badge-info">Statis</span>
                                     @else
-                                        Dinamis
+                                        <span class="badge badge-neutral">Dinamis</span>
                                     @endif
                                 </td>
-                                <td class="px-5 py-3.5 text-slate-600">{{ ($participant->archived_at ?? $participant->deleted_at)?->format('d-m-Y H:i') ?? '—' }}</td>
-                                <td class="px-5 py-3.5 text-right">
+                                <td class="font-mono text-xs">{{ ($participant->archived_at ?? $participant->deleted_at)?->format('d-m-Y H:i') ?? '—' }}</td>
+                                <td class="text-right">
                                     <form method="POST" action="{{ route('admin.retention.participants.restore', $participant->id) }}" onsubmit="return confirm('Pulihkan data alumni ini?')">
                                         @csrf
-                                        <button type="submit" class="rounded-lg border border-emerald-200 px-3 py-1.5 text-xs font-semibold text-emerald-700 hover:bg-emerald-50">Pulihkan</button>
+                                        <button type="submit" class="btn btn-secondary btn-sm">Pulihkan</button>
                                     </form>
                                 </td>
                             </tr>
                         @empty
-                            <tr><td colspan="5" class="px-5 py-8 text-center text-slate-500">Belum ada data alumni yang diarsipkan.</td></tr>
+                            <tr>
+                                <td colspan="5" class="table-empty">
+                                    <x-empty-state icon="archive" title="Belum ada alumni terarsip" description="Data yang melewati masa retensi akan muncul di sini." />
+                                </td>
+                            </tr>
                         @endforelse
                     </tbody>
                 </table>
             </div>
             @if ($archivedParticipants->hasPages())
-                <div class="border-t border-slate-200 px-5 py-4">{{ $archivedParticipants->links() }}</div>
+                <div class="border-t border-ink/10 px-5 py-4">{{ $archivedParticipants->links() }}</div>
             @endif
         </div>
     </section>
