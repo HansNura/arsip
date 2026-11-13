@@ -1,49 +1,76 @@
-@extends('layouts.app')
+@extends('layouts.backoffice')
 
 @section('title', $policy->exists ? 'Edit Kebijakan Retensi' : 'Tambah Kebijakan Retensi')
 
 @section('content')
-    <div class="mx-auto max-w-2xl">
-        <h1 class="text-3xl font-semibold tracking-tight">{{ $policy->exists ? 'Edit Kebijakan Retensi' : 'Tambah Kebijakan Retensi' }}</h1>
-        <p class="mt-2 text-sm text-slate-600">Kebijakan ini berlaku untuk peserta yang lulus dan seluruh pelatihannya selesai lebih dari masa retensi.</p>
+    <div class="mb-5">
+        <a href="{{ route('admin.retention.index') }}" class="inline-flex items-center gap-2 text-sm font-medium text-forest hover:text-forest-deep">
+            <x-icon name="arrow-right" class="size-4 rotate-180" />
+            Kembali ke retensi
+        </a>
+    </div>
 
-        <form method="POST" action="{{ $policy->exists ? route('admin.retention.update', $policy) : route('admin.retention.store') }}" class="mt-6 space-y-5 rounded-2xl border border-slate-200 bg-white p-6">
-            @csrf
-            @if ($policy->exists)
-                @method('PUT')
-            @endif
+    <x-page-header eyebrow="Administrasi" :title="$policy->exists ? 'Edit Kebijakan Retensi' : 'Tambah Kebijakan Retensi'"
+                  subtitle="Kebijakan berlaku untuk peserta lulus yang seluruh pelatihannya selesai lebih dari masa retensi." />
 
+    @if ($errors->any())
+        <div class="alert alert-danger mt-6">
+            <ul class="list-inside list-disc space-y-1">
+                @foreach ($errors->all() as $error)
+                    <li>{{ $error }}</li>
+                @endforeach
+            </ul>
+        </div>
+    @endif
+
+    <form method="POST" action="{{ $policy->exists ? route('admin.retention.update', $policy) : route('admin.retention.store') }}" class="card mt-6 max-w-3xl">
+        @csrf
+        @if ($policy->exists)
+            @method('PUT')
+        @endif
+
+        <div class="card-header">
             <div>
-                <label for="nama" class="block text-sm font-medium text-slate-700">Nama kebijakan</label>
-                <input id="nama" name="nama" type="text" value="{{ old('nama', $policy->nama) }}" required maxlength="120" class="mt-1 block w-full rounded-lg border-slate-300 text-sm">
-                @error('nama') <p class="mt-1 text-sm text-red-600">{{ $message }}</p> @enderror
+                <h2 class="section-title">Detail kebijakan</h2>
+                <p class="section-subtitle">Hanya satu kebijakan aktif untuk alumni pada satu waktu.</p>
             </div>
+        </div>
 
-            <div>
-                <label for="retention_years" class="block text-sm font-medium text-slate-700">Masa retensi (tahun)</label>
-                <input id="retention_years" name="retention_years" type="number" min="1" max="100" value="{{ old('retention_years', $policy->retention_years) }}" required class="mt-1 block w-full rounded-lg border-slate-300 text-sm">
-                @error('retention_years') <p class="mt-1 text-sm text-red-600">{{ $message }}</p> @enderror
-            </div>
+        <div class="card-body space-y-5">
+            <label class="block">
+                <span class="field-label">Nama kebijakan</span>
+                <input id="nama" name="nama" type="text" value="{{ old('nama', $policy->nama) }}" required maxlength="120" class="field-input">
+                @error('nama') <p class="field-error">{{ $message }}</p> @enderror
+            </label>
 
-            <div>
-                <label for="action" class="block text-sm font-medium text-slate-700">Tindakan setelah masa retensi</label>
-                <select id="action" name="action" required class="mt-1 block w-full rounded-lg border-slate-300 text-sm">
+            <label class="block">
+                <span class="field-label">Masa retensi (tahun)</span>
+                <input id="retention_years" name="retention_years" type="number" min="1" max="100" value="{{ old('retention_years', $policy->retention_years) }}" required class="field-input font-mono">
+                @error('retention_years') <p class="field-error">{{ $message }}</p> @enderror
+            </label>
+
+            <label class="block">
+                <span class="field-label">Tindakan setelah masa retensi</span>
+                <select id="action" name="action" required class="field-select">
                     <option value="cold_storage" @selected(old('action', $policy->action) === 'cold_storage')>Arsip statis — penyimpanan dingin</option>
                     <option value="arsipkan" @selected(old('action', $policy->action) === 'arsipkan')>Arsip dinamis — tetap tersedia di sistem</option>
                     <option value="hapus_lembut" @selected(old('action', $policy->action) === 'hapus_lembut')>Soft-delete — dapat dipulihkan admin</option>
                 </select>
-                @error('action') <p class="mt-1 text-sm text-red-600">{{ $message }}</p> @enderror
-            </div>
-
-            <label class="flex items-start gap-3 text-sm text-slate-700">
-                <input name="is_active" type="checkbox" value="1" @checked(old('is_active', $policy->is_active)) class="mt-0.5 rounded border-slate-300 text-emerald-700">
-                <span>Aktifkan kebijakan ini. Kebijakan aktif lainnya untuk alumni akan dinonaktifkan.</span>
+                @error('action') <p class="field-error">{{ $message }}</p> @enderror
             </label>
 
-            <div class="flex justify-end gap-3 border-t border-slate-100 pt-4">
-                <a href="{{ route('admin.retention.index') }}" class="rounded-xl border border-slate-300 px-4 py-2.5 text-sm font-semibold text-slate-700 hover:bg-slate-50">Batal</a>
-                <button type="submit" class="rounded-xl bg-emerald-700 px-4 py-2.5 text-sm font-semibold text-white hover:bg-emerald-800">Simpan kebijakan</button>
-            </div>
-        </form>
-    </div>
+            <label class="flex items-start gap-3 text-sm text-ink/70">
+                <input name="is_active" type="checkbox" value="1" @checked(old('is_active', $policy->is_active)) class="mt-0.5 size-4 rounded border-ink/20 text-forest focus:ring-forest/30">
+                <span>
+                    <span class="block font-medium text-ink">Aktifkan kebijakan ini</span>
+                    <span class="mt-0.5 block text-xs text-ink/45">Kebijakan aktif lainnya untuk alumni akan dinonaktifkan.</span>
+                </span>
+            </label>
+        </div>
+
+        <div class="flex items-center justify-end gap-3 border-t border-ink/10 px-5 py-4 sm:px-6">
+            <a href="{{ route('admin.retention.index') }}" class="btn btn-secondary">Batal</a>
+            <button type="submit" class="btn btn-primary">Simpan kebijakan</button>
+        </div>
+    </form>
 @endsection

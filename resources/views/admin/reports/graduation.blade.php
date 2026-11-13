@@ -1,59 +1,85 @@
-@extends('layouts.app')
+@extends('layouts.backoffice')
 
 @section('title', 'Rekap Kelulusan')
 
 @section('content')
-    <div class="flex flex-wrap items-end justify-between gap-4">
-        <div>
-            <h1 class="text-3xl font-semibold tracking-tight">Rekap Kelulusan</h1>
-            <p class="mt-2 text-sm text-slate-600">Ringkasan peserta per program dan tahun periode angkatan selesai.</p>
-        </div>
-    </div>
+    @php
+        $totalPeserta = $rows->sum('total_peserta');
+        $totalLulus = $rows->sum('lulus');
+        $totalTidakLulus = $rows->sum('tidak_lulus');
+    @endphp
 
-    <form method="GET" action="{{ route('admin.reports.graduation') }}" class="mt-6 flex flex-wrap items-end gap-3 rounded-2xl border border-slate-200 bg-white p-5">
-        <div>
-            <label for="from" class="block text-sm font-medium text-slate-700">Tanggal selesai dari</label>
-            <input id="from" name="from" type="date" value="{{ $filters['from'] }}" class="mt-1 rounded-lg border-slate-300 text-sm">
-        </div>
-        <div>
-            <label for="to" class="block text-sm font-medium text-slate-700">Tanggal selesai sampai</label>
-            <input id="to" name="to" type="date" value="{{ $filters['to'] }}" class="mt-1 rounded-lg border-slate-300 text-sm">
-        </div>
-        <button type="submit" class="rounded-xl bg-emerald-700 px-4 py-2.5 text-sm font-semibold text-white hover:bg-emerald-800">Terapkan</button>
-        <div class="ml-auto flex gap-2">
-            <a href="{{ route('admin.reports.graduation.export', ['format' => 'xlsx'] + array_filter($filters)) }}" class="rounded-xl border border-slate-300 px-4 py-2.5 text-sm font-semibold text-slate-700 hover:bg-slate-50">Ekspor Excel</a>
-            <a href="{{ route('admin.reports.graduation.export', ['format' => 'pdf'] + array_filter($filters)) }}" class="rounded-xl border border-slate-300 px-4 py-2.5 text-sm font-semibold text-slate-700 hover:bg-slate-50">Ekspor PDF</a>
+    <x-page-header eyebrow="Pelaporan" title="Rekap Kelulusan" subtitle="Ringkasan peserta per program dan tahun periode angkatan selesai." />
+
+    <section class="mt-6 grid gap-4 sm:grid-cols-3">
+        @foreach ([
+            ['Total peserta', $totalPeserta],
+            ['Lulus', $totalLulus],
+            ['Tidak lulus', $totalTidakLulus],
+        ] as [$label, $value])
+            <article class="card p-5">
+                <p class="stat-label">{{ $label }}</p>
+                <p class="stat-value">{{ number_format($value, 0, ',', '.') }}</p>
+            </article>
+        @endforeach
+    </section>
+
+    <form method="GET" action="{{ route('admin.reports.graduation') }}" class="card mt-6 p-5">
+        <div class="flex flex-wrap items-end gap-4">
+            <div>
+                <label for="from" class="field-label">Tanggal selesai dari</label>
+                <input id="from" name="from" type="date" value="{{ $filters['from'] }}" class="field-input">
+            </div>
+            <div>
+                <label for="to" class="field-label">Tanggal selesai sampai</label>
+                <input id="to" name="to" type="date" value="{{ $filters['to'] }}" class="field-input">
+            </div>
+            <button type="submit" class="btn btn-primary">Terapkan</button>
+            <div class="ml-auto flex flex-wrap gap-2">
+                <a href="{{ route('admin.reports.graduation.export', ['format' => 'xlsx'] + array_filter($filters)) }}" class="btn btn-secondary">
+                    <x-icon name="download" class="size-4" />
+                    Ekspor Excel
+                </a>
+                <a href="{{ route('admin.reports.graduation.export', ['format' => 'pdf'] + array_filter($filters)) }}" class="btn btn-secondary">
+                    <x-icon name="download" class="size-4" />
+                    Ekspor PDF
+                </a>
+            </div>
         </div>
         @foreach ($errors->all() as $error)
-            <p class="w-full text-sm text-red-600">{{ $error }}</p>
+            <p class="field-error">{{ $error }}</p>
         @endforeach
     </form>
 
-    <div class="mt-6 overflow-hidden rounded-2xl border border-slate-200 bg-white">
-        <div class="overflow-x-auto">
-            <table class="min-w-full divide-y divide-slate-200 text-sm">
-                <thead class="bg-slate-50 text-left text-xs font-semibold uppercase tracking-wide text-slate-500">
+    <div class="table-shell mt-6">
+        <div class="table-scroll">
+            <table class="data-table">
+                <thead>
                     <tr>
-                        <th class="px-5 py-3">Program</th>
-                        <th class="px-5 py-3">Periode</th>
-                        <th class="px-5 py-3 text-right">Total peserta</th>
-                        <th class="px-5 py-3 text-right">Lulus</th>
-                        <th class="px-5 py-3 text-right">Tidak lulus</th>
-                        <th class="px-5 py-3 text-right">Belum dinilai</th>
+                        <th>Program</th>
+                        <th>Periode</th>
+                        <th class="text-right">Total peserta</th>
+                        <th class="text-right">Lulus</th>
+                        <th class="text-right">Tidak lulus</th>
+                        <th class="text-right">Belum dinilai</th>
                     </tr>
                 </thead>
-                <tbody class="divide-y divide-slate-100">
+                <tbody>
                     @forelse ($rows as $row)
                         <tr>
-                            <td class="px-5 py-3.5 font-medium">{{ $row->program }}</td>
-                            <td class="px-5 py-3.5 text-slate-600">{{ $row->periode }}</td>
-                            <td class="px-5 py-3.5 text-right">{{ $row->total_peserta }}</td>
-                            <td class="px-5 py-3.5 text-right text-emerald-700">{{ $row->lulus }}</td>
-                            <td class="px-5 py-3.5 text-right text-red-700">{{ $row->tidak_lulus }}</td>
-                            <td class="px-5 py-3.5 text-right text-slate-600">{{ $row->belum_dinilai }}</td>
+                            <td><span class="font-semibold text-ink">{{ $row->program }}</span></td>
+                            <td class="font-mono text-xs">{{ $row->periode }}</td>
+                            <td class="text-right font-mono text-xs">{{ $row->total_peserta }}</td>
+                            <td class="text-right font-mono text-xs text-forest">{{ $row->lulus }}</td>
+                            <td class="text-right font-mono text-xs text-clay">{{ $row->tidak_lulus }}</td>
+                            <td class="text-right font-mono text-xs">{{ $row->belum_dinilai }}</td>
                         </tr>
                     @empty
-                        <tr><td colspan="6" class="px-5 py-8 text-center text-slate-500">Tidak ada data kelulusan pada periode ini.</td></tr>
+                        <tr>
+                            <td colspan="6" class="table-empty">
+                                <x-empty-state icon="chart" title="Tidak ada data kelulusan" description="Tidak ada peserta pada periode ini. Coba ubah filter tanggal." />
+                            </td>
+                        </tr>
                     @endforelse
                 </tbody>
             </table>

@@ -1,87 +1,84 @@
-@extends('layouts.app')
+@extends('layouts.backoffice')
 
 @section('title', 'Penerbitan Ulang')
 
 @section('content')
-    <div class="flex flex-wrap items-end justify-between gap-4">
-        <div>
-            <h1 class="text-3xl font-semibold tracking-tight text-slate-900">Penerbitan Ulang</h1>
-            <p class="mt-2 text-sm text-slate-600">Kelola permohonan reissue sertifikat dan penerbitan penggantinya.</p>
-        </div>
-        <a href="{{ route('admin.reissues.create') }}" class="rounded-xl bg-emerald-700 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-emerald-800">
+    <x-page-header eyebrow="Jejak audit" title="Penerbitan Ulang" subtitle="Kelola permohonan reissue sertifikat dan penerbitan penggantinya.">
+        <a href="{{ route('admin.reissues.create') }}" class="btn btn-primary btn-sm">
+            <x-icon name="plus" class="size-4" />
             Ajukan reissue
         </a>
-    </div>
+    </x-page-header>
 
     @if ($errors->any())
-        <div class="mt-6 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
-            {{ $errors->first() }}
-        </div>
+        <div class="alert alert-danger mt-6">{{ $errors->first() }}</div>
     @endif
 
-    <form method="GET" action="{{ route('admin.reissues.index') }}" class="mt-6 grid gap-4 rounded-2xl border border-slate-200 bg-white p-5 sm:grid-cols-2 lg:grid-cols-4">
-        <label class="block text-sm font-medium">Cari nomor atau nama
-            <input name="q" value="{{ $filters['q'] ?? '' }}" placeholder="PEL/2026/0001 atau nama peserta" class="mt-1.5 w-full rounded-lg border-slate-300 text-sm">
-        </label>
-        <label class="block text-sm font-medium">Status
-            <select name="status" class="mt-1.5 w-full rounded-lg border-slate-300 text-sm">
-                <option value="">Semua status</option>
-                @foreach ($statuses as $status)
-                    <option value="{{ $status->value }}" @selected(($filters['status'] ?? '') === $status->value)>{{ ucfirst($status->value) }}</option>
-                @endforeach
-            </select>
-        </label>
-        <div class="flex items-center gap-3">
-            <button type="submit" class="rounded-xl bg-slate-900 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-slate-800">Terapkan</button>
-            <a href="{{ route('admin.reissues.index') }}" class="text-sm font-medium text-slate-600 hover:text-slate-900">Reset</a>
+    <form method="GET" action="{{ route('admin.reissues.index') }}" class="card mt-6 p-5">
+        <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+            <label class="block">
+                <span class="field-label">Cari nomor atau nama</span>
+                <input name="q" value="{{ $filters['q'] ?? '' }}" placeholder="PEL/2026/0001 atau nama peserta" class="field-input">
+            </label>
+            <label class="block">
+                <span class="field-label">Status</span>
+                <select name="status" class="field-select">
+                    <option value="">Semua status</option>
+                    @foreach ($statuses as $status)
+                        <option value="{{ $status->value }}" @selected(($filters['status'] ?? '') === $status->value)>{{ ucfirst($status->value) }}</option>
+                    @endforeach
+                </select>
+            </label>
+            <div class="flex items-end gap-2">
+                <button type="submit" class="btn btn-primary">Terapkan</button>
+                <a href="{{ route('admin.reissues.index') }}" class="btn btn-ghost btn-sm">Reset</a>
+            </div>
         </div>
     </form>
 
-    <div class="mt-6 overflow-hidden rounded-2xl border border-slate-200 bg-white">
-        <div class="overflow-x-auto">
-            <table class="min-w-full divide-y divide-slate-200 text-sm">
-                <thead class="bg-slate-50 text-left text-xs font-semibold uppercase tracking-wide text-slate-500">
+    <div class="table-shell mt-6">
+        <div class="table-scroll">
+            <table class="data-table">
+                <thead>
                     <tr>
-                        <th class="px-5 py-3">Sertifikat asal</th>
-                        <th class="px-5 py-3">Pemohon</th>
-                        <th class="px-5 py-3">Alasan</th>
-                        <th class="px-5 py-3">Status</th>
-                        <th class="px-5 py-3">Diajukan</th>
-                        <th class="px-5 py-3 text-right">Aksi</th>
+                        <th>Sertifikat asal</th>
+                        <th>Pemohon</th>
+                        <th>Alasan</th>
+                        <th>Status</th>
+                        <th>Diajukan</th>
+                        <th class="text-right">Aksi</th>
                     </tr>
                 </thead>
-                <tbody class="divide-y divide-slate-100">
+                <tbody>
                     @forelse ($reissues as $reissue)
                         @php
                             $badge = match ($reissue->status) {
-                                \App\Enums\ReissueStatus::Diajukan => 'bg-amber-100 text-amber-800',
-                                \App\Enums\ReissueStatus::Disetujui => 'bg-sky-100 text-sky-800',
-                                \App\Enums\ReissueStatus::Ditolak => 'bg-red-100 text-red-800',
-                                \App\Enums\ReissueStatus::Selesai => 'bg-emerald-100 text-emerald-800',
+                                \App\Enums\ReissueStatus::Diajukan => 'badge-pending',
+                                \App\Enums\ReissueStatus::Disetujui => 'badge-info',
+                                \App\Enums\ReissueStatus::Ditolak => 'badge-cancelled',
+                                \App\Enums\ReissueStatus::Selesai => 'badge-valid',
                             };
                         @endphp
                         <tr>
-                            <td class="px-5 py-3.5 font-medium text-slate-900">
-                                {{ $reissue->originalCertificate?->nomor_sertifikat ?? '—' }}
-                                <p class="mt-0.5 text-xs font-normal text-slate-500">
-                                    {{ $reissue->originalCertificate?->enrollment?->participant?->nama_lengkap ?? '—' }}
-                                </p>
+                            <td>
+                                <span class="font-mono text-xs font-medium text-ink">{{ $reissue->originalCertificate?->nomor_sertifikat ?? '—' }}</span>
+                                <p class="mt-0.5 text-xs text-ink/45">{{ $reissue->originalCertificate?->enrollment?->participant?->nama_lengkap ?? '—' }}</p>
                             </td>
-                            <td class="px-5 py-3.5 text-slate-600">{{ $reissue->pemohon_nama ?? '—' }}</td>
-                            <td class="max-w-xs px-5 py-3.5 text-slate-600">{{ \Illuminate\Support\Str::limit($reissue->alasan, 60) }}</td>
-                            <td class="px-5 py-3.5">
-                                <span class="rounded-full px-2.5 py-1 text-xs font-medium {{ $badge }}">{{ ucfirst($reissue->status->value) }}</span>
-                            </td>
-                            <td class="px-5 py-3.5 text-slate-600">{{ $reissue->created_at?->format('d-m-Y H:i') ?? '—' }}</td>
-                            <td class="px-5 py-3.5 text-right">
-                                <a href="{{ route('admin.reissues.show', $reissue) }}" class="rounded-lg border border-slate-300 px-3 py-1.5 text-xs font-semibold text-slate-700 transition hover:border-slate-400 hover:bg-slate-50">
-                                    Lihat
-                                </a>
+                            <td>{{ $reissue->pemohon_nama ?? '—' }}</td>
+                            <td class="max-w-xs">{{ \Illuminate\Support\Str::limit($reissue->alasan, 60) }}</td>
+                            <td><span class="badge {{ $badge }}">{{ ucfirst($reissue->status->value) }}</span></td>
+                            <td class="font-mono text-xs">{{ $reissue->created_at?->format('d-m-Y H:i') ?? '—' }}</td>
+                            <td class="text-right">
+                                <a href="{{ route('admin.reissues.show', $reissue) }}" class="btn btn-secondary btn-sm">Lihat</a>
                             </td>
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="6" class="px-5 py-8 text-center text-slate-500">Belum ada permohonan reissue.</td>
+                            <td colspan="6" class="table-empty">
+                                <x-empty-state icon="reissue" title="Belum ada permohonan" description="Ajukan penerbitan ulang untuk sertifikat yang masih aktif.">
+                                    <a href="{{ route('admin.reissues.create') }}" class="btn btn-primary btn-sm">Ajukan reissue</a>
+                                </x-empty-state>
+                            </td>
                         </tr>
                     @endforelse
                 </tbody>
@@ -89,9 +86,7 @@
         </div>
 
         @if ($reissues->hasPages())
-            <div class="border-t border-slate-200 px-5 py-4">
-                {{ $reissues->links() }}
-            </div>
+            <div class="border-t border-ink/10 px-5 py-4">{{ $reissues->links() }}</div>
         @endif
     </div>
 @endsection
